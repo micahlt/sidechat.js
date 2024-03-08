@@ -1,0 +1,49 @@
+{
+  "source": {
+    "include": [
+      "index.js",
+      "package.json",
+      "README.md",
+      "types/SidechatTypes.js",
+      "classes/SidechatAPIError.js"
+    ],
+    "includePattern": ".js$",
+    "excludePattern": "(node_modules/|docs)"
+  },
+  "plugins": ["plugins/markdown"],
+  "opts": {
+    "encoding": "utf8",
+    "readme": "./README.md",
+    "destination": "docs/",
+    "package": "./package.json",
+    "recurse": true,
+    "verbose": true,
+    "template": "./node_modules/clean-jsdoc-theme",
+    "theme_opts": {
+      "default_theme": "dark",
+      "homepageTitle": "Sidechat.js Documentation",
+      "menu": [
+        {
+          "title": "Offsides (Sidechat for Android)",
+          "link": "https://github.com/micahlt/offsides#README.md",
+          "target": "_blank"
+        }
+      ],
+      "sections": [
+        "Classes",
+        "Modules",
+        "Externals",
+        "Events",
+        "Namespaces",
+        "Mixins",
+        "Tutorials",
+        "Interfaces",
+        "Global"
+      ]
+    }
+  },
+  "markdown": {
+    "hardwrap": false,
+    "idInHeadings": true
+  }
+}

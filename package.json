@@ -1,0 +1,36 @@
+{
+  "name": "sidechat.js",
+  "version": "1.0.0",
+  "description": "A reverse-engineered API wrapper for Sidechat",
+  "type": "module",
+  "source": "index.js",
+  "exports": {
+    "require": "./dist/sidechat.cjs",
+    "default": "./dist/sidechat.modern.js"
+  },
+  "main": "./dist/sidechat.cjs",
+  "module": "./dist/sidechat.module.js",
+  "unpkg": "./dist/sidechat.umd.js",
+  "scripts": {
+    "build": "microbundle",
+    "dev": "microbundle watch",
+    "docs": "npx jsdoc --configure jsdoc.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/micahlt/sidechat.js.git"
+  },
+  "author": "Micah Lindley",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/micahlt/sidechat.js/issues"
+  },
+  "homepage": "https://github.com/micahlt/sidechat.js#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "clean-jsdoc-theme": "^4.2.17",
+    "microbundle": "^0.15.1"
+  }
+}
