@@ -31,16 +31,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Read package.json version
-        uses: dutscher/read-package-json-endpoint-actions@v1.3.37
-        id: packagejson
+      - name: Read version of package.json
+        uses: xile611/read-package-version-action@v1
+        id: package-version
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: './docs/sidechat.js/${{ steps.packagejson.version }}'
+          path: './docs/sidechat.js/${{ steps.package-version.outputs.version }}/'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
