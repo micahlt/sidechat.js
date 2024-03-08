@@ -173,7 +173,6 @@ const setDeviceID = async (deviceID, token) => {
  * Get updated status for user and group
  * @param {String} token - user bearer token
  * @param {String} [groupID] - ID of a specific group to retrieve info from
- * @returns
  */
 const getUserAndGroup = async (token, groupID = "") => {
   try {
@@ -230,7 +229,6 @@ const getGroupPosts = async (groupID, token, category = "hot", cursor) => {
  * @param {String} postID - post ID to vote on
  * @param {String} token - user bearer token
  * @param {SidechatVoteString} action - whether to upvote, downvote, or reset vote
- * @returns
  */
 const setVote = async (postID, token, action) => {
   try {
