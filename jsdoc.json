@@ -29,17 +29,6 @@
           "link": "https://github.com/micahlt/offsides#README.md",
           "target": "_blank"
         }
-      ],
-      "sections": [
-        "Classes",
-        "Modules",
-        "Externals",
-        "Events",
-        "Namespaces",
-        "Mixins",
-        "Tutorials",
-        "Interfaces",
-        "Global"
       ]
     }
   },
