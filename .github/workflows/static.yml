@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Deploy docs site to Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -25,12 +25,18 @@ jobs:
   # Single deploy job since we're just deploying
   deploy:
     environment:
-      name: github-pages
+      name: JSDoc Site
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Generate documentation
+        run: npm install && npm run docs
       - name: Package.json info
         uses: rexdefuror/read-package-json@v1.0.5
       - name: Setup Pages
@@ -39,7 +45,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: './docs/sidechat.js/${{ env.PACKAGE_VERSION }}/'
+          path: './docs/sidechat.js/${{ env.PACKAGE_VERSION }}/*'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
