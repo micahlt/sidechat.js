@@ -34,7 +34,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: "20.x"
       - name: Generate documentation
         run: npm install && npm run docs
       - name: Package.json info
@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: './docs/sidechat.js/${{ env.PACKAGE_VERSION }}/*'
+          path: "./docs/sidechat.js/${{ env.PACKAGE_VERSION }}/"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
