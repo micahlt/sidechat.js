@@ -22,6 +22,7 @@
     "theme_opts": {
       "default_theme": "dark",
       "homepageTitle": "Sidechat.js Documentation",
+      "base_url": "https://micahlindley.com/sidechat.js/",
       "menu": [
         {
           "title": "Offsides (Sidechat for Android)",
