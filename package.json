@@ -14,7 +14,7 @@
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
-    "docs": "npx jsdoc --configure jsdoc.json"
+    "docs": "npx jsdoc --configure jsdoc.json --verbose"
   },
   "repository": {
     "type": "git",
