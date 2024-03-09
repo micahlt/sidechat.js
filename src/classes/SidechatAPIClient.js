@@ -2,10 +2,9 @@ import "../types/SidechatTypes.js";
 import SidechatAPIError from "../classes/SidechatAPIError.js";
 
 /**
- * API client class for making requests to Sidechat's private API.  As of now all methods are static.
+ * API client class for making requests to Sidechat's private API.  You'll need to {@tutorial authenticate|Authentication} before using most of the methods.
  * @class
  * @since 2.0.0-alpha.0
- * @todo Add functionality for constructing a client with or without a token and having it keep track of requests/caching, etc
  */
 class SidechatAPIClient {
   /** User bearer token */
