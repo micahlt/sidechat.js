@@ -1,5 +1,5 @@
-import "./types/SidechatTypes.js";
-import SidechatAPIError from "./classes/SidechatAPIError.js";
+import "../types/SidechatTypes.js";
+import SidechatAPIError from "../classes/SidechatAPIError.js";
 
 /**
  * API client class for making requests to Sidechat's private API.  As of now all methods are static.
@@ -348,7 +348,7 @@ class SidechatAPIClient {
    * Gets groups to be displayed on the "Explore Groups" page
    * @method
    * @param {String} token - user bearer token
-   * @returns {SidechatGroup}
+   * @returns {SidechatGroup[]}
    */
   static getAvailableGroups = async (token) => {
     try {
