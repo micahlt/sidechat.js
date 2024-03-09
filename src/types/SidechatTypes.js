@@ -74,6 +74,22 @@
  */
 
 /**
- * Represents a vote on a comment or post
+ * A vote on a comment or post
  * @typedef {"upvote"|"downvote"|"none"} SidechatVoteString
+ */
+
+/**
+ * A user's bearer authentication token needed for most requests
+ * @typedef {String} SidechatAuthToken
+ */
+
+/**
+ * A list of posts and the associated cursor
+ * @typedef {Object} SidechatPostsAndCursor
+ * @prop {SidechatPostOrComment[]} posts
+ * @prop {SidechatCursorString} cursor
+ */
+
+/**
+ * @tutorial Hello world
  */

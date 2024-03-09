@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "clean-jsdoc-theme": "^4.2.17",
-    "microbundle": "^0.15.1"
+    "microbundle": "^0.15.1",
+    "prompt-sync": "^4.2.0"
   }
 }

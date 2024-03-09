@@ -1,4 +1,4 @@
-import SidechatAPIClient from "./classes/SidechatAPIClient";
-import SidechatAPIError from "./classes/SidechatAPIError";
+import SidechatAPIClient from "./classes/SidechatAPIClient.js";
+import SidechatAPIError from "./classes/SidechatAPIError.js";
 
 export { SidechatAPIClient, SidechatAPIError };

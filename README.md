@@ -2,7 +2,7 @@
 
 [![NPM Downloads](https://img.shields.io/npm/dt/sidechat.js?label=downloads%20on%20npm)](https://npmjs.com/package/sidechat.js)
 
-A reverse-engineered API wrapper for [Sidechat](https://sidechat.lol) in Node.  Easy to use, documented with JSDoc, and kept up to date as much as possible.  Designed for [Offsides](https://github.com/micahlt/offsides), a third-party Sidechat client for Android devices.
+A reverse-engineered API wrapper for [Sidechat](https://sidechat.lol) in Node.  Easy to use, documented with JSDoc, and kept up to date as much as possible.  Designed for [Offsides](https://github.com/micahlt/offsides), a third-party Sidechat client for Android devices.  Documentation can be found [here](https://micahlindley.com/sidechat.js).
 
 ## Getting Started
 
@@ -14,4 +14,4 @@ Install sidechat.js with your preferred package manager:
 $ npm install sidechat.js
 ```
 
-No further setup should be needed.  Just `import` or `require` sidechat.js into your code wherever you plan on using Sidechat's API.  Extensive documentation can be found [here](https://micahlindley.com/sidechat.js).
+Next, take a look at the [authentication tutorial](https://micahlindley.com/sidechat.js/tutorial) to find out how to log your client in and begin making requests.

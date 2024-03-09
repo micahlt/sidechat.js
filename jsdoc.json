@@ -16,6 +16,7 @@
     "encoding": "utf8",
     "readme": "./README.md",
     "destination": "docs/",
+    "tutorials": "docs/tutorials",
     "package": "./package.json",
     "recurse": true,
     "verbose": true,
@@ -31,7 +32,7 @@
           "target": "_blank"
         }
       ],
-      "sections": ["Classes", "Global"]
+      "sections": ["Tutorials", "Classes", "Global"]
     }
   },
   "markdown": {
