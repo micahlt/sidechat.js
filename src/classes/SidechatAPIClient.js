@@ -2,7 +2,7 @@ import "../types/SidechatTypes.js";
 import SidechatAPIError from "../classes/SidechatAPIError.js";
 
 /**
- * API client class for making requests to Sidechat's private API.  You'll need to {@tutorial authenticate|Authentication} before using most of the methods.
+ * API client class for making requests to Sidechat's private API.  You'll need to [authenticate]{@tutorial Authentication} before using most of the methods.
  * @class
  * @since 2.0.0-alpha.0
  */
@@ -124,6 +124,7 @@ class SidechatAPIClient {
    * Initiate the email setup process.  Should be followed up with checkEmailVerification().
    * @method
    * @param {String} email - school email address to send verification code to
+   * @tutorial Email Registration
    */
   registerEmail = async (email) => {
     if (!this.userToken) {
