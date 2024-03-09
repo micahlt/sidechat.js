@@ -32,7 +32,7 @@ const { registration_id } = res;
 await API.setAge(18, registration_id);
 ```
 
-Now the user should be logged in properly and future requests will be automatically authenticated.  You may still need to [verify an email](/tutorial-Email%20Verification.html), though.
+Now the user should be logged in properly and future requests will be automatically authenticated.  You may still need to [verify an email](tutorial-Email%20Verification.html), though.
 
 ### Manual method
 

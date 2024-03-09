@@ -1,4 +1,4 @@
-> You can only start this process once you have [authenticated as a user](/tutorial-Authentication.html)
+> You can only start this process once you have [authenticated as a user](tutorial-Authentication.html)
 
 Start by sending a verification email to the user:
 
