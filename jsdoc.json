@@ -1,11 +1,12 @@
 {
   "source": {
     "include": [
-      "index.js",
+      "src/index.js",
       "package.json",
       "README.md",
-      "types/SidechatTypes.js",
-      "classes/SidechatAPIError.js"
+      "src/types/SidechatTypes.js",
+      "src/classes/SidechatAPIClient.js",
+      "src/classes/SidechatAPIError.js"
     ],
     "includePattern": ".js$",
     "excludePattern": "(node_modules/|docs)"
@@ -29,7 +30,8 @@
           "link": "https://github.com/micahlt/offsides#README.md",
           "target": "_blank"
         }
-      ]
+      ],
+      "sections": ["Classes", "Global"]
     }
   },
   "markdown": {
