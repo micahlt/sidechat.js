@@ -1,9 +1,10 @@
 {
   "name": "sidechat.js",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A reverse-engineered API wrapper for Sidechat",
   "type": "module",
   "source": "./src/index.js",
+  "types": "./dist/types.d.ts",
   "exports": {
     "require": "./dist/sidechat.cjs",
     "default": "./dist/sidechat.modern.js"
@@ -14,7 +15,9 @@
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
-    "docs": "npx jsdoc --configure jsdoc.json --verbose"
+    "docs": "npx jsdoc --configure jsdoc.json --verbose",
+    "prepublish": "jsdoc -r src -t node_modules/tsd-jsdoc/dist -d dist",
+    "typegen": "jsdoc -r src -t node_modules/tsd-jsdoc/dist -d dist"
   },
   "repository": {
     "type": "git",
@@ -33,5 +36,8 @@
     "clean-jsdoc-theme": "^4.2.17",
     "microbundle": "^0.15.1",
     "prompt-sync": "^4.2.0"
+  },
+  "dependencies": {
+    "tsd-jsdoc": "^2.5.0"
   }
 }
