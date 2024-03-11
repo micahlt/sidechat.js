@@ -7,9 +7,16 @@ import SidechatAPIError from "../classes/SidechatAPIError.js";
  * @since 2.0.0-alpha.0
  */
 class SidechatAPIClient {
-  /** User bearer token */
+  /**
+   * User bearer token
+   * @type {SidechatAuthToken}
+   * */
   userToken;
-  /** Default headers for every API request */
+  /**
+   * Default headers for every API request
+   * @type {Object}
+   * @static
+   */
   defaultHeaders = {
     Accept: "application/json",
     "Content-Type": "application/json",
