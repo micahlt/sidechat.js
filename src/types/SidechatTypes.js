@@ -28,7 +28,7 @@
  */
 
 /**
- * A group object, containing metadata about a group as well as its join conditions and states
+ * A group object, containing metadata about a group as well as its join conditions and states.  Some properties vary based on the endpoint the object came from.
  * @typedef {Object} SidechatGroup
  * @prop {String} id - alphanumeric ID of group
  * @prop {String} name - human-readable name of group
@@ -51,8 +51,8 @@
  * @prop {String} id - alphanumeric ID of asset
  * @prop {"image"} type - undocumented
  * @prop {"jpeg"|"png"|"gif"} content_type - file type of asset
- * @prop {Number} width - the width of asset
- * @prop {Number} height - the height of asset
+ * @prop {Number} width - width of asset
+ * @prop {Number} height - height of asset
  * @prop {SidechatPrivateAssetURL} url - URL string of asset's location
  */
 
@@ -68,17 +68,37 @@
 /**
  * An asset object, containing information about an image from the asset library
  * @typedef {Object} SidechatAssetMetadata
- * @prop {Number} width - the width of asset
- * @prop {Number} height - the height of asset
+ * @prop {Number} width - width of asset
+ * @prop {Number} height - height of asset
  * @prop {"image"} type - undocumented
  * @prop {"jpeg"|"png"|"gif"} content_type - file type of asset
  */
 
 /**
- * A user's identity information
+ * A user's anonymous identity information
  * @typedef {Object} SidechatIdentity
  * @prop {String} name - representation of user's name (varies across app)
  * @prop {Boolean} posted_with_username - undocumented
+ */
+
+/**
+ * The current user's information
+ * @typedef {Object} SidechatCurrentUser
+ * @prop {String} id - alphanumeric ID of current user
+ * @prop {String} hashedVerifiedEmail - verified email of current user in an unreadable hashed form
+ * @prop {Boolean} isGlobalModerator - whether or not user is a moderator
+ * @prop {Boolean} isGlobalAdmin - whether or not user is an admin
+ * @prop {SidechatMembership[]} memberships
+ * @prop {Array} roles - undocumented
+ * @prop {String} emailDomain - domain of verified email address on account
+ * @prop {String} wildcardEmailDomain - domain of verified email address on account, preceeded by *. to support subdomains
+ */
+
+/**
+ * Representation of a group membership
+ * @typedef {Object} SidechatMembership
+ * @prop {String} groupId - alphanumeric ID of group
+ * @prop {String} type - role of current user in group
  */
 
 /**

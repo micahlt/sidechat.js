@@ -19,6 +19,7 @@ declare class SidechatAPIClient {
      * Default headers for every API request
      * @type {Object}
      * @static
+     * @constant
      */
     defaultHeaders: any;
     /**
@@ -75,9 +76,17 @@ declare class SidechatAPIClient {
      * Get updated status for user and group
      * @method
      * @since 1.0.0
-     * @param {String} [groupID] - ID of a specific group to retrieve info from
+     * @deprecated since 2.1.0, will be removed by 3.0.0.  Please use `getUpdates` instead!
+     * @param {String} [groupID] - ID of a specific group to retrieve info from.  Falls back to user's primary group.
      */
     getUserAndGroup: (groupID?: string) => Promise<any>;
+    /**
+     * Get updated status for user and group
+     * @method
+     * @since 2.1.0
+     * @param {String} [groupID] - ID of a specific group to retrieve info from.  Falls back to user's primary group.
+     */
+    getUpdates: (groupID?: string) => Promise<any>;
     /**
      * Fetches posts from the specified category in a group
      * @method
@@ -118,5 +127,20 @@ declare class SidechatAPIClient {
      * @returns {SidechatLibraryAsset[]}
      */
     getAssetLibrary: () => SidechatLibraryAsset[];
+    /**
+     * Gets the current authenticated user and a list of the groups of which they are members.
+     * @method
+     * @since 2.1.0
+     * @returns {SidechatCurrentUser}
+     */
+    getCurrentUser: () => SidechatCurrentUser;
+    /**
+     * Gets the metadata of a group from its ID
+     * @method
+     * @since 2.1.0
+     * @param {String} [groupID] - alphanumeric ID of a group to get.  Falls back to user's primary group.
+     * @returns {SidechatGroup}
+     */
+    getGroupMetadata: (groupID?: string) => SidechatGroup;
 }
 //# sourceMappingURL=SidechatAPIClient.d.ts.map

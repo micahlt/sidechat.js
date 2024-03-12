@@ -102,7 +102,7 @@ export type SidechatPostOrComment = {
     context?: string;
 };
 /**
- * A group object, containing metadata about a group as well as its join conditions and states
+ * A group object, containing metadata about a group as well as its join conditions and states.  Some properties vary based on the endpoint the object came from.
  */
 export type SidechatGroup = {
     /**
@@ -175,11 +175,11 @@ export type SidechatSimpleAsset = {
      */
     content_type: "jpeg" | "png" | "gif";
     /**
-     * - the width of asset
+     * - width of asset
      */
     width: number;
     /**
-     * - the height of asset
+     * - height of asset
      */
     height: number;
     /**
@@ -213,11 +213,11 @@ export type SidechatLibraryAsset = {
  */
 export type SidechatAssetMetadata = {
     /**
-     * - the width of asset
+     * - width of asset
      */
     width: number;
     /**
-     * - the height of asset
+     * - height of asset
      */
     height: number;
     /**
@@ -230,7 +230,7 @@ export type SidechatAssetMetadata = {
     content_type: "jpeg" | "png" | "gif";
 };
 /**
- * A user's identity information
+ * A user's anonymous identity information
  */
 export type SidechatIdentity = {
     /**
@@ -241,6 +241,53 @@ export type SidechatIdentity = {
      * - undocumented
      */
     posted_with_username: boolean;
+};
+/**
+ * The current user's information
+ */
+export type SidechatCurrentUser = {
+    /**
+     * - alphanumeric ID of current user
+     */
+    id: string;
+    /**
+     * - verified email of current user in an unreadable hashed form
+     */
+    hashedVerifiedEmail: string;
+    /**
+     * - whether or not user is a moderator
+     */
+    isGlobalModerator: boolean;
+    /**
+     * - whether or not user is an admin
+     */
+    isGlobalAdmin: boolean;
+    memberships: SidechatMembership[];
+    /**
+     * - undocumented
+     */
+    roles: any[];
+    /**
+     * - domain of verified email address on account
+     */
+    emailDomain: string;
+    /**
+     * - domain of verified email address on account, preceeded by *. to support subdomains
+     */
+    wildcardEmailDomain: string;
+};
+/**
+ * Representation of a group membership
+ */
+export type SidechatMembership = {
+    /**
+     * - alphanumeric ID of group
+     */
+    groupId: string;
+    /**
+     * - role of current user in group
+     */
+    type: string;
 };
 /**
  * An asset URL that can only be accessed by making a request with a user's bearer token attached in the Authorization header
