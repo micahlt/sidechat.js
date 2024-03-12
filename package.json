@@ -4,20 +4,20 @@
   "description": "A reverse-engineered API wrapper for Sidechat",
   "type": "module",
   "source": "./src/index.js",
-  "types": "./dist/types.d.ts",
+  "types": "./src/index.d.ts",
   "exports": {
-    "require": "./dist/sidechat.cjs",
-    "default": "./dist/sidechat.modern.js"
+    "default": "./dist/sidechat.modern.js",
+    "require": "./dist/sidechat.cjs"
   },
+  "unpkg": "./dist/sidechat.umd.js",
   "main": "./dist/sidechat.cjs",
   "module": "./dist/sidechat.module.js",
-  "unpkg": "./dist/sidechat.umd.js",
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
-    "docs": "npx jsdoc --configure jsdoc.json --verbose",
-    "prepublish": "jsdoc -r src -t node_modules/tsd-jsdoc/dist -d dist",
-    "typegen": "jsdoc -r src -t node_modules/tsd-jsdoc/dist -d dist"
+    "docs": "jsdoc --configure jsdoc.json --verbose",
+    "prepublish": "tsc",
+    "typegen": "tsc"
   },
   "repository": {
     "type": "git",
@@ -35,7 +35,8 @@
   "devDependencies": {
     "clean-jsdoc-theme": "^4.2.17",
     "microbundle": "^0.15.1",
-    "prompt-sync": "^4.2.0"
+    "prompt-sync": "^4.2.0",
+    "typescript": "^5.4.2"
   },
   "dependencies": {
     "tsd-jsdoc": "^2.5.0"

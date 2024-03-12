@@ -1,3 +1,4 @@
+import "./types/SidechatTypes";
 import SidechatAPIClient from "./classes/SidechatAPIClient.js";
 import SidechatAPIError from "./classes/SidechatAPIError.js";
 
