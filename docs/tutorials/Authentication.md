@@ -6,9 +6,16 @@ Go ahead and import `SidechatAPIClient` from the module:
 import { SidechatAPIClient } from "sidechat.js";
 ```
 
+
 ### Automatic method
 
-For existing users, this is trivial.  First, send the user a verification code to their phone number.  Make sure the passed phone number is in a 10-digit format with no dashes, spaces, or parentheses:
+First, create a new instance of the client:
+
+```javascript
+const API = new SidechatAPIClient();
+```
+
+For existing users, logging in is trivial.  First, send the user a verification code to their phone number.  Make sure the passed phone number is in a 10-digit format with no dashes, spaces, or parentheses:
 
 ```javascript
 const phoneNumber = /* User's phone number */;
