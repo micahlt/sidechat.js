@@ -1,6 +1,6 @@
 {
   // Change this to match your project
-  "include": ["src/*.js"],
+  "include": ["src/*.js", "src/classes/*.js", "src/types/*.js"],
   "exclude": ["src/tests", "src/internal"],
   "compilerOptions": {
     // Tells TypeScript to read JS files, as
@@ -13,6 +13,8 @@
     "emitDeclarationOnly": true,
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
-    "declarationMap": true
+    "declarationMap": true,
+    "declarationDir": "dist",
+    "outDir": "dist"
   }
 }
