@@ -90,6 +90,4 @@
  * @prop {SidechatCursorString} cursor
  */
 
-/**
- * @tutorial Hello world
- */
+export default {};

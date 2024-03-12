@@ -1,6 +1,6 @@
 {
   "name": "sidechat.js",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "A reverse-engineered API wrapper for Sidechat",
   "type": "module",
   "source": "./src/index.js",
@@ -17,6 +17,10 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./src/types": {
+      "types": "./dist/types/SidechatTypes.d.ts",
+      "default": "./src/types/SidechatTypes.js"
     }
   },
   "scripts": {

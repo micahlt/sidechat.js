@@ -1,7 +1,9 @@
+declare const _default: {};
+export default _default;
 /**
  * A user-created post or comment, depending on the "type" prop
  */
-type SidechatPostOrComment = {
+export type SidechatPostOrComment = {
     /**
      * - whether this object represents a post or a comment on a post
      */
@@ -102,7 +104,7 @@ type SidechatPostOrComment = {
 /**
  * A group object, containing metadata about a group as well as its join conditions and states
  */
-type SidechatGroup = {
+export type SidechatGroup = {
     /**
      * - alphanumeric ID of group
      */
@@ -159,7 +161,7 @@ type SidechatGroup = {
 /**
  * An asset object, containing information about an image within a post or comment
  */
-type SidechatAsset = {
+export type SidechatAsset = {
     /**
      * - alphanumeric ID of asset
      */
@@ -188,7 +190,7 @@ type SidechatAsset = {
 /**
  * A user's identity information
  */
-type SidechatIdentity = {
+export type SidechatIdentity = {
     /**
      * - representation of user's name (varies across app)
      */
@@ -201,23 +203,23 @@ type SidechatIdentity = {
 /**
  * An asset URL that can only be accessed by making a request with a user's bearer token attached in the Authorization header
  */
-type SidechatPrivateAssetURL = string;
+export type SidechatPrivateAssetURL = string;
 /**
  * A cursor for paginating through post lists
  */
-type SidechatCursorString = string;
+export type SidechatCursorString = string;
 /**
  * A vote on a comment or post
  */
-type SidechatVoteString = "upvote" | "downvote" | "none";
+export type SidechatVoteString = "upvote" | "downvote" | "none";
 /**
  * A user's bearer authentication token needed for most requests
  */
-type SidechatAuthToken = string;
+export type SidechatAuthToken = string;
 /**
  * A list of posts and the associated cursor
  */
-type SidechatPostsAndCursor = {
+export type SidechatPostsAndCursor = {
     posts: SidechatPostOrComment[];
     cursor: SidechatCursorString;
 };
