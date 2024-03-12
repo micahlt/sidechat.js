@@ -45,9 +45,9 @@ export type SidechatPostOrComment = {
      */
     vote_status: SidechatVoteString;
     /**
-     * - array of assets attached to post or comment
+     * - array of simple assets attached to post or comment
      */
-    assets: SidechatAsset[];
+    assets: SidechatSimpleAsset[];
     /**
      * - undocumented
      */
@@ -161,7 +161,7 @@ export type SidechatGroup = {
 /**
  * An asset object, containing information about an image within a post or comment
  */
-export type SidechatAsset = {
+export type SidechatSimpleAsset = {
     /**
      * - alphanumeric ID of asset
      */
@@ -186,6 +186,48 @@ export type SidechatAsset = {
      * - URL string of asset's location
      */
     url: SidechatPrivateAssetURL;
+};
+/**
+ * An asset object, containing information about an image from the asset library
+ */
+export type SidechatLibraryAsset = {
+    /**
+     * - alphanumeric ID of asset
+     */
+    id: string;
+    /**
+     * - date string of asset creation time
+     */
+    created_at: string;
+    /**
+     * - metadata associated with asset
+     */
+    metadata: SidechatAssetMetadata;
+    /**
+     * - URL string of asset's location
+     */
+    url: SidechatPrivateAssetURL;
+};
+/**
+ * An asset object, containing information about an image from the asset library
+ */
+export type SidechatAssetMetadata = {
+    /**
+     * - the width of asset
+     */
+    width: number;
+    /**
+     * - the height of asset
+     */
+    height: number;
+    /**
+     * - undocumented
+     */
+    type: "image";
+    /**
+     * - file type of asset
+     */
+    content_type: "jpeg" | "png" | "gif";
 };
 /**
  * A user's identity information

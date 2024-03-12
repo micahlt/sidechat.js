@@ -11,7 +11,7 @@
  * @prop {String} created_at - date string of post or comment creation time
  * @prop {Number} vote_total - sum of upvotes and downvotes
  * @prop {SidechatVoteString} vote_status - current user's vote on post or comment
- * @prop {SidechatAsset[]} assets - array of assets attached to post or comment
+ * @prop {SidechatSimpleAsset[]} assets - array of simple assets attached to post or comment
  * @prop {Array} attachments - undocumented
  * @prop {Boolean} dms_disabled - whether or not you can send a DM to creator of post
  * @prop {Array} tags - undocumented
@@ -47,13 +47,31 @@
 
 /**
  * An asset object, containing information about an image within a post or comment
- * @typedef {Object} SidechatAsset
+ * @typedef {Object} SidechatSimpleAsset
  * @prop {String} id - alphanumeric ID of asset
  * @prop {"image"} type - undocumented
  * @prop {"jpeg"|"png"|"gif"} content_type - file type of asset
  * @prop {Number} width - the width of asset
  * @prop {Number} height - the height of asset
  * @prop {SidechatPrivateAssetURL} url - URL string of asset's location
+ */
+
+/**
+ * An asset object, containing information about an image from the asset library
+ * @typedef {Object} SidechatLibraryAsset
+ * @prop {String} id - alphanumeric ID of asset
+ * @prop {String} created_at - date string of asset creation time
+ * @prop {SidechatAssetMetadata} metadata - metadata associated with asset
+ * @prop {SidechatPrivateAssetURL} url - URL string of asset's location
+ */
+
+/**
+ * An asset object, containing information about an image from the asset library
+ * @typedef {Object} SidechatAssetMetadata
+ * @prop {Number} width - the width of asset
+ * @prop {Number} height - the height of asset
+ * @prop {"image"} type - undocumented
+ * @prop {"jpeg"|"png"|"gif"} content_type - file type of asset
  */
 
 /**
