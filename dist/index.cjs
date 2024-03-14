@@ -632,7 +632,7 @@ class SidechatAPIClient {
    * Deletes a post or comment that the user created
    * @method
    * @since 2.2.0
-   * @param {String} postOrCommentID - alphanumeric ID of the post to delete
+   * @param {String} postOrCommentID - alphanumeric ID of post to delete
    */
   deletePostOrComment = async (postOrCommentID) => {
     if (!this.userToken) {
@@ -654,6 +654,43 @@ class SidechatAPIClient {
     } catch (err) {
       console.error(err);
       throw new SidechatAPIError(`Failed to delete post.`);
+    }
+  };
+
+  /**
+   * Sets the conversation icon of the current user
+   * @method
+   * @since 2.2.1
+   * @param {String} userID - alphanumeric ID of the post to delete
+   * @param {String} emoji - emoji to set as icon
+   * @param {String} primaryColor - hex string (including #) of primary color
+   * @param {String} secondaryColor - hex string (including #) of secondary color
+   */
+  setUserIcon = async (userID, emoji, primaryColor, secondaryColor) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`https://api.sidechat.lol/v1/users/${userID}`, {
+        method: "PATCH",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          conversation_icon: {
+            emoji: emoji,
+            secondary_color: secondaryColor,
+            is_migrated: false,
+            color: primaryColor,
+          },
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to set icon.`);
     }
   };
 }

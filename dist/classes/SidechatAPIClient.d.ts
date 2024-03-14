@@ -171,8 +171,18 @@ declare class SidechatAPIClient {
      * Deletes a post or comment that the user created
      * @method
      * @since 2.2.0
-     * @param {String} postOrCommentID - alphanumeric ID of the post to delete
+     * @param {String} postOrCommentID - alphanumeric ID of post to delete
      */
     deletePostOrComment: (postOrCommentID: string) => Promise<any>;
+    /**
+     * Sets the conversation icon of the current user
+     * @method
+     * @since 2.2.1
+     * @param {String} userID - alphanumeric ID of the post to delete
+     * @param {String} emoji - emoji to set as icon
+     * @param {String} primaryColor - hex string (including #) of primary color
+     * @param {String} secondaryColor - hex string (including #) of secondary color
+     */
+    setUserIcon: (userID: string, emoji: string, primaryColor: string, secondaryColor: string) => Promise<any>;
 }
 //# sourceMappingURL=SidechatAPIClient.d.ts.map
