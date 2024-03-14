@@ -142,5 +142,37 @@ declare class SidechatAPIClient {
      * @returns {SidechatGroup}
      */
     getGroupMetadata: (groupID?: string) => SidechatGroup;
+    /**
+     * Creates a comment on a post
+     * @method
+     * @since 2.2.0
+     * @param {String} parentPostID - alphanumeric ID of post on which this comment is made
+     * @param {String} text - text content of comment
+     * @param {String} groupID - alphanumeric ID of group in which the parent post resides
+     * @param {String} [replyCommentID] - alphanumeric ID of comment to reply to.  Falls back to parentPostID
+     * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach
+     * @param {Boolean} [disableDMs] - prevent direct messages being sent to comment's author
+     * @returns {SidechatPostOrComment} created comment
+     */
+    createComment: (parentPostID: string, text: string, groupID: string, replyCommentID?: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean) => SidechatPostOrComment;
+    /**
+     * Creates a new post in the specified group
+     * @method
+     * @since 2.2.0
+     * @param {String} text - text content of comment
+     * @param {String} groupID - alphanumeric ID of group in which the parent post resides
+     * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach.
+     * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
+     * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
+     * @returns {SidechatPostOrComment} the created post
+     */
+    createPost: (text: string, groupID: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean) => SidechatPostOrComment;
+    /**
+     * Deletes a post or comment that the user created
+     * @method
+     * @since 2.2.0
+     * @param {String} postOrCommentID - alphanumeric ID of the post to delete
+     */
+    deletePostOrComment: (postOrCommentID: string) => Promise<any>;
 }
 //# sourceMappingURL=SidechatAPIClient.d.ts.map

@@ -13,8 +13,8 @@ async function main() {
     await API.verifySMSCode(phoneNum, code);
     console.log("User auth token:", API.userToken);
   } else {
-    const lib = await API.getAssetLibrary();
-    console.log(lib);
+    const updates = await API.getUpdates();
+    console.log(updates);
   }
 }
 

@@ -53,7 +53,7 @@
  * @prop {"jpeg"|"png"|"gif"} content_type - file type of asset
  * @prop {Number} width - width of asset
  * @prop {Number} height - height of asset
- * @prop {SidechatPrivateAssetURL} url - URL string of asset's location
+ * @prop {SidechatPrivateAssetURL} [url] - URL string of asset's location
  */
 
 /**

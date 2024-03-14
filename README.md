@@ -14,4 +14,4 @@ Install sidechat.js with your preferred package manager:
 $ npm install sidechat.js
 ```
 
-Next, take a look at the [authentication tutorial](tutorial-Authentication.html) to find out how to log your client in and begin making requests.
+Next, take a look at the [authentication tutorial](https://micahlindley.com/sidechat.js/tutorial-Authentication.html) to find out how to log your client in and begin making requests.

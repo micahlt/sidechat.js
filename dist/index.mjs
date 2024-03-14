@@ -526,7 +526,130 @@ class SidechatAPIClient {
       return await json.group;
     } catch (err) {
       console.error(err);
-      throw new SidechatAPIError(`Failed to get asset library.`);
+      throw new SidechatAPIError(`Failed to get group metadata.`);
+    }
+  };
+
+  /**
+   * Creates a comment on a post
+   * @method
+   * @since 2.2.0
+   * @param {String} parentPostID - alphanumeric ID of post on which this comment is made
+   * @param {String} text - text content of comment
+   * @param {String} groupID - alphanumeric ID of group in which the parent post resides
+   * @param {String} [replyCommentID] - alphanumeric ID of comment to reply to.  Falls back to parentPostID
+   * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach
+   * @param {Boolean} [disableDMs] - prevent direct messages being sent to comment's author
+   * @returns {SidechatPostOrComment} created comment
+   */
+  createComment = async (
+    parentPostID,
+    text,
+    groupID,
+    replyCommentID = parentPostID,
+    assetList = [],
+    disableDMs = false
+  ) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`https://api.sidechat.lol/v1/posts`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          type: "comment",
+          assets: assetList,
+          group_ids: [groupID],
+          text: text,
+          reply_post_id: replyCommentID,
+          parent_post_id: parentPostID,
+          dms_disabled: disableDMs,
+        }),
+      });
+      const json = await res.json();
+      return await json.comment;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to post comment.`);
+    }
+  };
+
+  /**
+   * Creates a new post in the specified group
+   * @method
+   * @since 2.2.0
+   * @param {String} text - text content of comment
+   * @param {String} groupID - alphanumeric ID of group in which the parent post resides
+   * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach.
+   * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
+   * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
+   * @returns {SidechatPostOrComment} the created post
+   */
+  createPost = async (
+    text,
+    groupID,
+    assetList = [],
+    disableDMs = false,
+    disableComments = false
+  ) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`https://api.sidechat.lol/v1/posts`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          type: "post",
+          assets: assetList,
+          group_ids: [groupID],
+          text: text,
+          attachments: [],
+          dms_disabled: disableDMs,
+          comments_disabled: disableComments,
+        }),
+      });
+      const json = await res.json();
+      return await json.posts[0];
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to make post.`);
+    }
+  };
+
+  /**
+   * Deletes a post or comment that the user created
+   * @method
+   * @since 2.2.0
+   * @param {String} postOrCommentID - alphanumeric ID of the post to delete
+   */
+  deletePostOrComment = async (postOrCommentID) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`https://api.sidechat.lol/v1/posts/delete`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          post_id: postOrCommentID,
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to delete post.`);
     }
   };
 }

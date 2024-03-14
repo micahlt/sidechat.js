@@ -185,7 +185,7 @@ export type SidechatSimpleAsset = {
     /**
      * - URL string of asset's location
      */
-    url: SidechatPrivateAssetURL;
+    url?: SidechatPrivateAssetURL;
 };
 /**
  * An asset object, containing information about an image from the asset library
