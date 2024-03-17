@@ -31,6 +31,7 @@ class SidechatAPIClient {
     Accept: "application/json",
     "Content-Type": "application/json",
     "App-Version": "10.0.0",
+    Dnt: "1",
   };
 
   /**
@@ -440,8 +441,10 @@ class SidechatAPIClient {
       const res = await fetch(`https://api.sidechat.lol/v1/groups/explore`, {
         method: "GET",
         headers: {
-          ...this.defaultHeaders,
+          Accept: "application/json",
+          "Content-Type": "application/json",
           Authorization: `Bearer ${this.userToken}`,
+          Dnt: "1",
         },
       });
       const json = await res.json();
