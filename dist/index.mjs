@@ -30,6 +30,7 @@ class SidechatAPIClient {
   defaultHeaders = {
     Accept: "application/json",
     "Content-Type": "application/json",
+    "App-Version": "10.0.0",
   };
 
   /**
@@ -677,7 +678,7 @@ class SidechatAPIClient {
           conversation_icon: {
             emoji: emoji,
             secondary_color: secondaryColor,
-            is_migrated: false,
+            is_migrated: true,
             color: primaryColor,
           },
         }),
