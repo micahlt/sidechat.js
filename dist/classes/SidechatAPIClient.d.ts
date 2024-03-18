@@ -106,6 +106,15 @@ declare class SidechatAPIClient {
      */
     setVote: (postID: string, action: SidechatVoteString) => Promise<any>;
     /**
+     * Fetches a single post with just its ID
+     * @method
+     * @since 2.3.0
+     * @param {String} postID - ID of post to fetch
+     * @param {Boolean} includeDeleted - undocumented
+     * @returns {SidechatPostOrComment} post object
+     */
+    getPost: (postID: string, includeDeleted?: boolean) => SidechatPostOrComment;
+    /**
      * Get all the commments on a post
      * @method
      * @since 2.0.0-alpha.0
@@ -184,5 +193,12 @@ declare class SidechatAPIClient {
      * @param {String} secondaryColor - hex string (including #) of secondary color
      */
     setUserIcon: (userID: string, emoji: string, primaryColor: string, secondaryColor: string) => Promise<any>;
+    /**
+     * Marks an activity item as read
+     * @method
+     * @since 2.3.2
+     * @param {String} activityID - alphanumeric ID of activity object
+     */
+    readActivity: (activityID: string) => Promise<any>;
 }
 //# sourceMappingURL=SidechatAPIClient.d.ts.map

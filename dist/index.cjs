@@ -356,6 +356,37 @@ class SidechatAPIClient {
   };
 
   /**
+   * Fetches a single post with just its ID
+   * @method
+   * @since 2.3.0
+   * @param {String} postID - ID of post to fetch
+   * @param {Boolean} includeDeleted - undocumented
+   * @returns {SidechatPostOrComment} post object
+   */
+  getPost = async (postID, includeDeleted = false) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(
+        `https://api.sidechat.lol/v1/posts/get?include_deleted=${includeDeleted}&post_id=${postID}`,
+        {
+          method: "GET",
+          headers: {
+            ...this.defaultHeaders,
+            Authorization: `Bearer ${this.userToken}`,
+          },
+        }
+      );
+      const json = await res.json();
+      return json.post;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to get post from ID.`);
+    }
+  };
+
+  /**
    * Get all the commments on a post
    * @method
    * @since 2.0.0-alpha.0
@@ -693,6 +724,35 @@ class SidechatAPIClient {
     } catch (err) {
       console.error(err);
       throw new SidechatAPIError(`Failed to set icon.`);
+    }
+  };
+
+  /**
+   * Marks an activity item as read
+   * @method
+   * @since 2.3.2
+   * @param {String} activityID - alphanumeric ID of activity object
+   */
+  readActivity = async (activityID) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`https://api.sidechat.lol/v1/activity/seen`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          ids: [activityID],
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to mark activity as read.`);
     }
   };
 }
