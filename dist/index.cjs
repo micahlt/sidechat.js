@@ -562,21 +562,23 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
+      const data = JSON.stringify({
+        type: "comment",
+        assets: assetList,
+        group_ids: [groupID],
+        text: text,
+        reply_post_id: replyCommentID,
+        parent_post_id: parentPostID,
+        dms_disabled: disableDMs,
+      });
       const res = await fetch(`https://api.sidechat.lol/v1/posts`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
           Authorization: `Bearer ${this.userToken}`,
+          "Content-Length": data.length,
         },
-        body: JSON.stringify({
-          type: "comment",
-          assets: assetList,
-          group_ids: [groupID],
-          text: text,
-          reply_post_id: replyCommentID,
-          parent_post_id: parentPostID,
-          dms_disabled: disableDMs,
-        }),
+        body: data,
       });
       const json = await res.json();
       return await json.comment;
@@ -608,21 +610,23 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
+      const data = JSON.stringify({
+        type: "post",
+        assets: assetList,
+        group_ids: [groupID],
+        text: text,
+        attachments: [],
+        dms_disabled: disableDMs,
+        comments_disabled: disableComments,
+      });
       const res = await fetch(`https://api.sidechat.lol/v1/posts`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
           Authorization: `Bearer ${this.userToken}`,
+          "Content-Length": data.length,
         },
-        body: JSON.stringify({
-          type: "post",
-          assets: assetList,
-          group_ids: [groupID],
-          text: text,
-          attachments: [],
-          dms_disabled: disableDMs,
-          comments_disabled: disableComments,
-        }),
+        body: data,
       });
       const json = await res.json();
       return await json.posts[0];
