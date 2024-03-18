@@ -126,9 +126,10 @@ declare class SidechatAPIClient {
      * Gets groups to be displayed on the "Explore Groups" page
      * @method
      * @since 2.0.0-alpha.0
+     * @param {Boolean} onePage - whether or not results should be returned as a single page
      * @returns {SidechatGroup[]}
      */
-    getAvailableGroups: () => SidechatGroup[];
+    getAvailableGroups: (onePage?: boolean) => SidechatGroup[];
     /**
      * Retrieves the entire accessible asset library.  Be warned that as of the time of this documentation, it's a 1.5MB JSON download and this request is very expensive.
      * @method

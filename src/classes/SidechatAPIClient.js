@@ -21,7 +21,7 @@ class SidechatAPIClient {
   defaultHeaders = {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "App-Version": "10.0.0",
+    "App-Version": "4.2.0",
     Dnt: 1,
   };
 
@@ -453,9 +453,10 @@ class SidechatAPIClient {
    * Gets groups to be displayed on the "Explore Groups" page
    * @method
    * @since 2.0.0-alpha.0
+   * @param {Boolean} onePage - whether or not results should be returned as a single page
    * @returns {SidechatGroup[]}
    */
-  getAvailableGroups = async () => {
+  getAvailableGroups = async (onePage = true) => {
     if (!this.userToken) {
       throw new SidechatAPIError("User is not authenticated.");
     }
@@ -464,6 +465,7 @@ class SidechatAPIClient {
         method: "GET",
         headers: {
           ...this.defaultHeaders,
+          "App-Version": onePage ? "0" : this.defaultHeaders["App-Version"],
           Authorization: `Bearer ${this.userToken}`,
         },
       });
