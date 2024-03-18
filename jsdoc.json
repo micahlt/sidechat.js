@@ -6,7 +6,8 @@
       "README.md",
       "src/types/SidechatTypes.js",
       "src/classes/SidechatAPIClient.js",
-      "src/classes/SidechatAPIError.js"
+      "src/classes/SidechatAPIError.js",
+      "src/classes/SidechatColorList.js"
     ],
     "includePattern": ".js$",
     "excludePattern": "(node_modules/|docs)"

@@ -115,6 +115,14 @@ declare class SidechatAPIClient {
      */
     getPost: (postID: string, includeDeleted?: boolean) => SidechatPostOrComment;
     /**
+     * Fetches the posts or comments that the user has created
+     * @method
+     * @since 2.3.5
+     * @param {"posts"|"comments"} contentType - type of user content to fetch
+     * @returns {SidechatPostOrComment[]} post object
+     */
+    getUserContent: (contentType: "posts" | "comments") => SidechatPostOrComment[];
+    /**
      * Get all the commments on a post
      * @method
      * @since 2.0.0-alpha.0
@@ -174,9 +182,10 @@ declare class SidechatAPIClient {
      * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach.
      * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
      * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
+     * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
      * @returns {SidechatPostOrComment} the created post
      */
-    createPost: (text: string, groupID: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean) => SidechatPostOrComment;
+    createPost: (text: string, groupID: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean) => SidechatPostOrComment;
     /**
      * Deletes a post or comment that the user created
      * @method
@@ -188,12 +197,28 @@ declare class SidechatAPIClient {
      * Sets the conversation icon of the current user
      * @method
      * @since 2.2.1
-     * @param {String} userID - alphanumeric ID of the post to delete
+     * @param {String} userID - alphanumeric ID of user
      * @param {String} emoji - emoji to set as icon
      * @param {String} primaryColor - hex string (including #) of primary color
      * @param {String} secondaryColor - hex string (including #) of secondary color
      */
     setUserIcon: (userID: string, emoji: string, primaryColor: string, secondaryColor: string) => Promise<any>;
+    /**
+     * Checks if user can set their username to a string
+     * @method
+     * @since 2.3.6
+     * @param {String} username - string to check
+     * @returns {Boolean} whether or not username is valid and unused
+     */
+    checkUsername: (username: string) => boolean;
+    /**
+     * Changes the username of the current user
+     * @method
+     * @since 2.3.6
+     * @param {String} userID - alphanumeric ID of user
+     * @param {String} username - new username to set
+     */
+    setUsername: (userID: string, username: string) => Promise<any>;
     /**
      * Marks an activity item as read
      * @method
@@ -201,5 +226,17 @@ declare class SidechatAPIClient {
      * @param {String} activityID - alphanumeric ID of activity object
      */
     readActivity: (activityID: string) => Promise<any>;
+    /**
+     * Retrieves joinable group chats
+     * @method
+     * @since 2.3.5
+     */
+    getGroupChats: () => Promise<any>;
+    /**
+     * Joins a group chat
+     * @method
+     * @since 2.3.5
+     */
+    joinGroupChat: (groupChatID: any, displayName: any, emoji: any, primaryColor: any, secondaryColor: any) => Promise<any>;
 }
 //# sourceMappingURL=SidechatAPIClient.d.ts.map
