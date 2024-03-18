@@ -30,7 +30,7 @@ class SidechatAPIClient {
   defaultHeaders = {
     Accept: "application/json",
     "Content-Type": "application/json",
-    "App-Version": "4.2.0",
+    "App-Version": "6.0.0",
     Dnt: 1,
   };
 
