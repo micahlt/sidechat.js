@@ -31,8 +31,7 @@ class SidechatAPIClient {
     Accept: "application/json",
     "Content-Type": "application/json",
     "App-Version": "10.0.0",
-    Dnt: "1",
-    Host: "sidechat.lol",
+    Dnt: 1,
   };
 
   /**
@@ -442,10 +441,8 @@ class SidechatAPIClient {
       const res = await fetch(`https://api.sidechat.lol/v1/groups/explore`, {
         method: "GET",
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
+          ...this.defaultHeaders,
           Authorization: `Bearer ${this.userToken}`,
-          Dnt: "1",
         },
       });
       const json = await res.json();
@@ -559,23 +556,21 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const data = JSON.stringify({
-        type: "comment",
-        assets: assetList,
-        group_ids: [groupID],
-        text: text,
-        reply_post_id: replyCommentID,
-        parent_post_id: parentPostID,
-        dms_disabled: disableDMs,
-      });
       const res = await fetch(`https://api.sidechat.lol/v1/posts`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
           Authorization: `Bearer ${this.userToken}`,
-          "Content-Length": data.length,
         },
-        body: data,
+        body: JSON.stringify({
+          type: "comment",
+          assets: assetList,
+          group_ids: [groupID],
+          text: text,
+          reply_post_id: replyCommentID,
+          parent_post_id: parentPostID,
+          dms_disabled: disableDMs,
+        }),
       });
       const json = await res.json();
       return await json.comment;
@@ -607,23 +602,21 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const data = JSON.stringify({
-        type: "post",
-        assets: assetList,
-        group_ids: [groupID],
-        text: text,
-        attachments: [],
-        dms_disabled: disableDMs,
-        comments_disabled: disableComments,
-      });
       const res = await fetch(`https://api.sidechat.lol/v1/posts`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
           Authorization: `Bearer ${this.userToken}`,
-          "Content-Length": data.length,
         },
-        body: data,
+        body: JSON.stringify({
+          type: "post",
+          assets: assetList,
+          group_ids: [groupID],
+          text: text,
+          attachments: [],
+          dms_disabled: disableDMs,
+          comments_disabled: disableComments,
+        }),
       });
       const json = await res.json();
       return await json.posts[0];
