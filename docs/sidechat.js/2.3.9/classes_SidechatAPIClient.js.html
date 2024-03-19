@@ -614,7 +614,7 @@ class SidechatAPIClient {
             Authorization: `Bearer ${this.userToken}`,
           },
           body: JSON.stringify({
-            group_id: groupID,
+            group_id: [groupID],
           }),
         }
       );
