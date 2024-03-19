@@ -16,10 +16,12 @@ export type SidechatColor = {
  */
 /**
  * List of colors compatible with user conversation icons
- * @constant
- * @type {{ colors: SidechatColor[] }}
+ * @prop {SidechatColor[]} colors - list of color themes for user icons
  */
-declare const SidechatColorList: {
-    colors: SidechatColor[];
-};
+declare class SidechatColorList {
+    colors: {
+        primary: string;
+        secondary: string;
+    }[];
+}
 //# sourceMappingURL=SidechatColorList.d.ts.map

@@ -592,6 +592,39 @@ class SidechatAPIClient {
   };
 
   /**
+   * Joins or leaves a group
+   * @method
+   * @param {String} groupID - alphanumeric ID of group to join or leave
+   * @param {Boolean} isMember - whether or not the user should be a member of the group
+   * @since 2.3.8
+   */
+  setGroupMembership = async (groupID, isMember) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(
+        `https://api.sidechat.lol/v1/groups/${isMember ? "join" : "leave"}`,
+        {
+          method: "POST",
+          headers: {
+            ...this.defaultHeaders,
+            Authorization: `Bearer ${this.userToken}`,
+          },
+          body: JSON.stringify({
+            group_id: groupID,
+          }),
+        }
+      );
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to modify group membership.`);
+    }
+  };
+
+  /**
    * Creates a comment on a post
    * @method
    * @since 2.2.0

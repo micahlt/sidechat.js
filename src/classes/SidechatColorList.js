@@ -6,11 +6,10 @@
 
 /**
  * List of colors compatible with user conversation icons
- * @constant
- * @type {{ colors: SidechatColor[] }}
+ * @prop {SidechatColor[]} colors - list of color themes for user icons
  */
-const SidechatColorList = {
-  colors: [
+class SidechatColorList {
+  colors = [
     {
       primary: "#74DEEE",
       secondary: "#239EAB",
@@ -71,7 +70,7 @@ const SidechatColorList = {
       primary: "#0968E5",
       secondary: "#091970",
     },
-  ],
-};
+  ];
+}
 
 export default SidechatColorList;

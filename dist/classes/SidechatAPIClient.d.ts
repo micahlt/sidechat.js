@@ -161,6 +161,14 @@ declare class SidechatAPIClient {
      */
     getGroupMetadata: (groupID?: string) => SidechatGroup;
     /**
+     * Joins or leaves a group
+     * @method
+     * @param {String} groupID - alphanumeric ID of group to join or leave
+     * @param {Boolean} isMember - whether or not the user should be a member of the group
+     * @since 2.3.8
+     */
+    setGroupMembership: (groupID: string, isMember: boolean) => Promise<any>;
+    /**
      * Creates a comment on a post
      * @method
      * @since 2.2.0
