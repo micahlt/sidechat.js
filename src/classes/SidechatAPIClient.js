@@ -12,6 +12,7 @@ class SidechatAPIClient {
    * @type {SidechatAuthToken}
    * */
   userToken;
+
   /**
    * Default headers for every API request
    * @type {Object}
@@ -26,12 +27,23 @@ class SidechatAPIClient {
   };
 
   /**
+   * Root URL for every API request
+   * @type {String}
+   * @default "https://api.sidechat.lol"
+   */
+  apiRoot = "https://api.sidechat.lol";
+
+  /**
    * Create a new instance of the API client
    * @param {SidechatAuthToken} [token] - user bearer token
+   * @param {String} rootUrl - custom API root URL for mocking or using other server
    */
-  constructor(token = "") {
+  constructor(token = "", rootUrl = "") {
     if (token) {
       this.userToken = token;
+    }
+    if (rootUrl) {
+      this.apiRoot = rootUrl;
     }
   }
 
@@ -45,6 +57,16 @@ class SidechatAPIClient {
   };
 
   /**
+   * Manually set the root URL for all API requests.  This can be used for mocking requests or redirecting them to a different server
+   * @method
+   * @param {String} url - new root URL to set
+   * @since 2.3.9
+   */
+  setAPIRoot = (url) => {
+    this.apiRoot = url;
+  };
+
+  /**
    * Initiate the login process with a phone number.  Should be followed up with verifySMSCode().
    * @method
    * @since 1.0.0
@@ -52,7 +74,7 @@ class SidechatAPIClient {
    */
   loginViaSMS = async (phoneNumber) => {
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/login_register`, {
+      const res = await fetch(`${this.apiRoot}/v1/login_register`, {
         method: "POST",
         headers: this.defaultHeaders,
         body: JSON.stringify({
@@ -77,17 +99,14 @@ class SidechatAPIClient {
    */
   verifySMSCode = async (phoneNumber, code) => {
     try {
-      const res = await fetch(
-        `https://api.sidechat.lol/v1/verify_phone_number`,
-        {
-          method: "POST",
-          headers: this.defaultHeaders,
-          body: JSON.stringify({
-            phone_number: `+1${phoneNumber}`,
-            code: code.toUpperCase(),
-          }),
-        }
-      );
+      const res = await fetch(`${this.apiRoot}/v1/verify_phone_number`, {
+        method: "POST",
+        headers: this.defaultHeaders,
+        body: JSON.stringify({
+          phone_number: `+1${phoneNumber}`,
+          code: code.toUpperCase(),
+        }),
+      });
       const json = await res.json();
       if (json?.logged_in_user?.token) {
         this.userToken = json.logged_in_user.token;
@@ -111,17 +130,14 @@ class SidechatAPIClient {
       throw new SidechatAPIError("You're too young to use Offsides.");
     }
     try {
-      const res = await fetch(
-        `https://api.sidechat.lol/v1/complete_registration`,
-        {
-          method: "POST",
-          headers: this.defaultHeaders,
-          body: JSON.stringify({
-            age: Number(age),
-            registration_id: registrationID,
-          }),
-        }
-      );
+      const res = await fetch(`${this.apiRoot}/v1/complete_registration`, {
+        method: "POST",
+        headers: this.defaultHeaders,
+        body: JSON.stringify({
+          age: Number(age),
+          registration_id: registrationID,
+        }),
+      });
       const json = await res.json();
       if (json.token) {
         this.userToken = json.token;
@@ -145,19 +161,16 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(
-        `https://api.sidechat.lol/v2/users/register_email`,
-        {
-          method: "POST",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-          body: JSON.stringify({
-            email: email,
-          }),
-        }
-      );
+      const res = await fetch(`${this.apiRoot}/v2/users/register_email`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
+      });
       const json = await res.json();
       if (json.message) {
         throw new SidechatAPIError(json.message);
@@ -179,16 +192,13 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(
-        `https://api.sidechat.lol/v1/users/check_email_verified`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        }
-      );
+      const res = await fetch(`${this.apiRoot}/v1/users/check_email_verified`, {
+        method: "GET",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+      });
       const json = await res.json();
       if (json.verified_email_updates_response) {
         return json.verified_email_updates_response;
@@ -212,21 +222,18 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(
-        `https://api.sidechat.lol/v1/register_device_token`,
-        {
-          method: "POST",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-          body: JSON.stringify({
-            build_type: "release",
-            bundle_id: "com.flowerave.sidechat",
-            device_token: deviceID,
-          }),
-        }
-      );
+      const res = await fetch(`${this.apiRoot}/v1/register_device_token`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          build_type: "release",
+          bundle_id: "com.flowerave.sidechat",
+          device_token: deviceID,
+        }),
+      });
       const json = await res.json();
       await AsyncStorage.setItem("deviceID", deviceID);
       return json;
@@ -260,7 +267,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `https://api.sidechat.lol/v1/updates?group_id=${groupID}`,
+        `${this.apiRoot}/v1/updates?group_id=${groupID}`,
         {
           method: "GET",
           headers: {
@@ -292,7 +299,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `https://api.sidechat.lol/v1/posts?group_id=${groupID}&type=${category}${
+        `${this.apiRoot}/v1/posts?group_id=${groupID}&type=${category}${
           cursor ? "&cursor=" + cursor : ""
         }`,
         {
@@ -323,7 +330,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/posts/set_vote`, {
+      const res = await fetch(`${this.apiRoot}/v1/posts/set_vote`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
@@ -356,7 +363,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `https://api.sidechat.lol/v1/posts/get?include_deleted=${includeDeleted}&post_id=${postID}`,
+        `${this.apiRoot}/v1/posts/get?include_deleted=${includeDeleted}&post_id=${postID}`,
         {
           method: "GET",
           headers: {
@@ -390,16 +397,13 @@ class SidechatAPIClient {
       contentType = "my_comments";
     }
     try {
-      const res = await fetch(
-        `https://api.sidechat.lol/v1/posts&type=${contentType}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        }
-      );
+      const res = await fetch(`${this.apiRoot}/v1/posts&type=${contentType}`, {
+        method: "GET",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+      });
       const json = await res.json();
       return json.posts;
     } catch (err) {
@@ -421,7 +425,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `https://api.sidechat.lol/v1/posts/comments/?post_id=${postID}`,
+        `${this.apiRoot}/v1/posts/comments/?post_id=${postID}`,
         {
           method: "GET",
           headers: {
@@ -496,7 +500,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/groups/explore`, {
+      const res = await fetch(`${this.apiRoot}/v1/groups/explore`, {
         method: "GET",
         headers: {
           ...this.defaultHeaders,
@@ -523,7 +527,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/assets/library`, {
+      const res = await fetch(`${this.apiRoot}/v1/assets/library`, {
         method: "GET",
         headers: {
           ...this.defaultHeaders,
@@ -549,7 +553,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/users/me`, {
+      const res = await fetch(`${this.apiRoot}/v1/users/me`, {
         method: "GET",
         headers: {
           ...this.defaultHeaders,
@@ -576,7 +580,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/groups/${groupID}`, {
+      const res = await fetch(`${this.apiRoot}/v1/groups/${groupID}`, {
         method: "GET",
         headers: {
           ...this.defaultHeaders,
@@ -604,7 +608,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `https://api.sidechat.lol/v1/groups/${isMember ? "join" : "leave"}`,
+        `${this.apiRoot}/v1/groups/${isMember ? "join" : "leave"}`,
         {
           method: "POST",
           headers: {
@@ -648,7 +652,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/posts`, {
+      const res = await fetch(`${this.apiRoot}/v1/posts`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
@@ -696,7 +700,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/posts`, {
+      const res = await fetch(`${this.apiRoot}/v1/posts`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
@@ -732,7 +736,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/posts/delete`, {
+      const res = await fetch(`${this.apiRoot}/v1/posts/delete`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
@@ -764,7 +768,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/users/${userID}`, {
+      const res = await fetch(`${this.apiRoot}/v1/users/${userID}`, {
         method: "PATCH",
         headers: {
           ...this.defaultHeaders,
@@ -801,7 +805,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `https://api.sidechat.lol/v1/users/username?username=${username}`,
+        `${this.apiRoot}/v1/users/username?username=${username}`,
         {
           method: "GET",
           headers: {
@@ -833,7 +837,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/users/${userID}`, {
+      const res = await fetch(`${this.apiRoot}/v1/users/${userID}`, {
         method: "PATCH",
         headers: {
           ...this.defaultHeaders,
@@ -862,7 +866,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/activity/seen`, {
+      const res = await fetch(`${this.apiRoot}/v1/activity/seen`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
@@ -890,7 +894,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/chats/explore`, {
+      const res = await fetch(`${this.apiRoot}/v1/chats/explore`, {
         method: "GET",
         headers: {
           ...this.defaultHeaders,
@@ -921,7 +925,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`https://api.sidechat.lol/v1/chats/groups/join`, {
+      const res = await fetch(`${this.apiRoot}/v1/chats/groups/join`, {
         method: "GET",
         headers: {
           ...this.defaultHeaders,

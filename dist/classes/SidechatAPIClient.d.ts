@@ -8,8 +8,9 @@ declare class SidechatAPIClient {
     /**
      * Create a new instance of the API client
      * @param {SidechatAuthToken} [token] - user bearer token
+     * @param {String} rootUrl - custom API root URL for mocking or using other server
      */
-    constructor(token?: SidechatAuthToken);
+    constructor(token?: SidechatAuthToken, rootUrl?: string);
     /**
      * User bearer token
      * @type {SidechatAuthToken}
@@ -23,11 +24,24 @@ declare class SidechatAPIClient {
      */
     defaultHeaders: any;
     /**
+     * Root URL for every API request
+     * @type {String}
+     * @default "https://api.sidechat.lol"
+     */
+    apiRoot: string;
+    /**
      * Manually set the currently signed in user's token.  Generally try to avoid this and instead either pass a token to the constructor or login automatically through the auth functions
      * @method
      * @param {SidechatAuthToken} token - user bearer token
      */
     setToken: (token: SidechatAuthToken) => void;
+    /**
+     * Manually set the root URL for all API requests.  This can be used for mocking requests or redirecting them to a different server
+     * @method
+     * @param {String} url - new root URL to set
+     * @since 2.3.9
+     */
+    setAPIRoot: (url: string) => void;
     /**
      * Initiate the login process with a phone number.  Should be followed up with verifySMSCode().
      * @method
