@@ -651,6 +651,7 @@ class SidechatAPIClient {
    * @param {String} [replyCommentID] - alphanumeric ID of comment to reply to.  Falls back to parentPostID
    * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach
    * @param {Boolean} [disableDMs] - prevent direct messages being sent to comment's author
+   * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on comment
    * @returns {SidechatPostOrComment} created comment
    */
   createComment = async (
@@ -659,7 +660,8 @@ class SidechatAPIClient {
     groupID,
     replyCommentID = parentPostID,
     assetList = [],
-    disableDMs = false
+    disableDMs = false,
+    anonymous = false
   ) => {
     if (!this.userToken) {
       throw new SidechatAPIError("User is not authenticated.");
@@ -679,6 +681,7 @@ class SidechatAPIClient {
           reply_post_id: replyCommentID,
           parent_post_id: parentPostID,
           dms_disabled: disableDMs,
+          using_identity: !anonymous,
         }),
       });
       const json = await res.json();

@@ -192,9 +192,10 @@ declare class SidechatAPIClient {
      * @param {String} [replyCommentID] - alphanumeric ID of comment to reply to.  Falls back to parentPostID
      * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach
      * @param {Boolean} [disableDMs] - prevent direct messages being sent to comment's author
+     * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on comment
      * @returns {SidechatPostOrComment} created comment
      */
-    createComment: (parentPostID: string, text: string, groupID: string, replyCommentID?: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean) => SidechatPostOrComment;
+    createComment: (parentPostID: string, text: string, groupID: string, replyCommentID?: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, anonymous?: boolean) => SidechatPostOrComment;
     /**
      * Creates a new post in the specified group
      * @method
