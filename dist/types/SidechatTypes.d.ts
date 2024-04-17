@@ -312,4 +312,78 @@ export type SidechatPostsAndCursor = {
     posts: SidechatPostOrComment[];
     cursor: SidechatCursorString;
 };
+/**
+ * A direct message thread
+ */
+export type SidechatDirectThread = {
+    /**
+     * - alphanumeric ID of thread
+     */
+    id: string;
+    /**
+     * - alphanumeric ID of group in which the thread exists
+     */
+    group_id: string;
+    /**
+     * - date string of when the last message in the chat was sent
+     */
+    updated_at: string;
+    /**
+     * - post or comment from which the thread was originally sent
+     */
+    post_id: string;
+    /**
+     * - the context of the DM thread (only "feed" is known at the moment)
+     */
+    post_context: string;
+    /**
+     * - whether or not the other user has accepted this DM
+     */
+    accept_status: "accepted";
+    /**
+     * - the type of the content from which the DM was originally sent
+     */
+    type: "post" | "comment";
+    /**
+     * - array of direct message objects
+     */
+    messages: SidechatDirectMessage[];
+};
+/**
+ * A single direct message
+ */
+export type SidechatDirectMessage = {
+    /**
+     * - time at which the message was sent
+     */
+    created_at: string;
+    /**
+     * - alphanumeric ID of the device the message was sent on
+     */
+    client_id: string;
+    /**
+     * - obfuscated version of the sender's alphanumeric ID
+     */
+    obfuscatedUserId: string;
+    /**
+     * - body text of the message
+     */
+    text: string;
+    /**
+     * - alphanumeric ID of the message
+     */
+    id: string;
+    /**
+     * - alphanumeric ID of the thread in which the message resides
+     */
+    chat_id: string;
+    /**
+     * - whether or not the current user sent the message
+     */
+    authored_by_user: boolean;
+    /**
+     * - undocumented
+     */
+    type: "message";
+};
 //# sourceMappingURL=SidechatTypes.d.ts.map

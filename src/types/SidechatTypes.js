@@ -129,3 +129,29 @@
  */
 
 export default {};
+
+/**
+ * A direct message thread
+ * @typedef {Object} SidechatDirectThread
+ * @prop {String} id - alphanumeric ID of thread
+ * @prop {String} group_id - alphanumeric ID of group in which the thread exists
+ * @prop {String} updated_at - date string of when the last message in the chat was sent
+ * @prop {String} post_id - post or comment from which the thread was originally sent
+ * @prop {String} post_context - the context of the DM thread (only "feed" is known at the moment)
+ * @prop {"accepted"} accept_status - whether or not the other user has accepted this DM
+ * @prop {"post"|"comment"} type - the type of the content from which the DM was originally sent
+ * @prop {SidechatDirectMessage[]} messages - array of direct message objects
+ */
+
+/**
+ * A single direct message
+ * @typedef {Object} SidechatDirectMessage
+ * @prop {String} created_at - time at which the message was sent
+ * @prop {String} client_id - alphanumeric ID of the device the message was sent on
+ * @prop {String} obfuscatedUserId - obfuscated version of the sender's alphanumeric ID
+ * @prop {String} text - body text of the message
+ * @prop {String} id - alphanumeric ID of the message
+ * @prop {String} chat_id - alphanumeric ID of the thread in which the message resides
+ * @prop {Boolean} authored_by_user - whether or not the current user sent the message
+ * @prop {"message"} type - undocumented
+ */

@@ -261,5 +261,42 @@ declare class SidechatAPIClient {
      * @since 2.3.5
      */
     joinGroupChat: (groupChatID: any, displayName: any, emoji: any, primaryColor: any, secondaryColor: any) => Promise<any>;
+    /**
+     * Gets a list of the user's direct messages
+     * @method
+     * @returns {SidechatDirectThread[]}
+     * @since 2.4.4
+     */
+    getDMs: () => SidechatDirectThread[];
+    /**
+     * Gets a single direct message thread
+     * @method
+     * @param {String} id - alphanumeric ID of the chat to fetch
+     * @returns {SidechatDirectThread}
+     * @since 2.4.4
+     */
+    getDMThread: (id: string) => SidechatDirectThread;
+    /**
+     * Sends a message to an existing direct message thread - note that you must first use startDM() to start a thread.
+     * @method
+     * @param {String} chatID - alphanumeric ID of the chat to send to
+     * @param {String} text - text content of message
+     * @param {String} clientID - alphanumeric device ID
+     * @param {SidechatAsset[]} - array of assets to send
+     * @param {Boolean} anonymous - whether the DM should be sent anonymously
+     * @since 2.4.4
+     */
+    sendDM: (chatID: string, text: string, clientID: string, assets?: any[], anonymous?: boolean) => Promise<any>;
+    /**
+     * Creates a new direct message thread
+     * @method
+     * @param {String} text - text content of message
+     * @param {String} clientID - alphanumeric ID of devide
+     * @param {String} postID - alphanumeric ID of post or comment
+     * @param {Boolean} anonymous - whether the DM should be sent anonymously
+     * @param {"feed"} postContext - context of post (mostly undocumented, defaults to "feed")
+     * @since 2.4.4
+     */
+    startDM: (text: string, clientID: string, postID: string, anonymous?: boolean, postContext?: "feed") => Promise<any>;
 }
 //# sourceMappingURL=SidechatAPIClient.d.ts.map

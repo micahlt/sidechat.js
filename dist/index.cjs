@@ -135,6 +135,32 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var SidechatTypes = {};
 
 /**
+ * A direct message thread
+ * @typedef {Object} SidechatDirectThread
+ * @prop {String} id - alphanumeric ID of thread
+ * @prop {String} group_id - alphanumeric ID of group in which the thread exists
+ * @prop {String} updated_at - date string of when the last message in the chat was sent
+ * @prop {String} post_id - post or comment from which the thread was originally sent
+ * @prop {String} post_context - the context of the DM thread (only "feed" is known at the moment)
+ * @prop {"accepted"} accept_status - whether or not the other user has accepted this DM
+ * @prop {"post"|"comment"} type - the type of the content from which the DM was originally sent
+ * @prop {SidechatDirectMessage[]} messages - array of direct message objects
+ */
+
+/**
+ * A single direct message
+ * @typedef {Object} SidechatDirectMessage
+ * @prop {String} created_at - time at which the message was sent
+ * @prop {String} client_id - alphanumeric ID of the device the message was sent on
+ * @prop {String} obfuscatedUserId - obfuscated version of the sender's alphanumeric ID
+ * @prop {String} text - body text of the message
+ * @prop {String} id - alphanumeric ID of the message
+ * @prop {String} chat_id - alphanumeric ID of the thread in which the message resides
+ * @prop {Boolean} authored_by_user - whether or not the current user sent the message
+ * @prop {"message"} type - undocumented
+ */
+
+/**
  * Throwable error caused by the Sidechat API
  * @class
  * @extends Error
@@ -1074,7 +1100,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(`${this.apiRoot}/v1/chats/groups/join`, {
-        method: "GET",
+        method: "POST",
         headers: {
           ...this.defaultHeaders,
           Authorization: `Bearer ${this.userToken}`,
@@ -1094,6 +1120,147 @@ class SidechatAPIClient {
     } catch (err) {
       console.error(err);
       throw new SidechatAPIError(`Failed to join groupchat.`);
+    }
+  };
+
+  /**
+   * Gets a list of the user's direct messages
+   * @method
+   * @returns {SidechatDirectThread[]}
+   * @since 2.4.4
+   */
+  getDMs = async () => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/chats`, {
+        method: "GET",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+      });
+      const json = await res.json();
+      const list = await json.chats;
+      let r = [];
+      list.forEach((o) => {
+        r.push(o.chat);
+      });
+      return await r;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to fetch DMs.`);
+    }
+  };
+
+  /**
+   * Gets a single direct message thread
+   * @method
+   * @param {String} id - alphanumeric ID of the chat to fetch
+   * @returns {SidechatDirectThread}
+   * @since 2.4.4
+   */
+  getDMThread = async (id) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(
+        `${this.apiRoot}/v1/chats/messages?chat_id=${id}`,
+        {
+          method: "GET",
+          headers: {
+            ...this.defaultHeaders,
+            Authorization: `Bearer ${this.userToken}`,
+          },
+        }
+      );
+      const json = await res.json();
+      return await json.chat;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to fetch DM thread.`);
+    }
+  };
+
+  /**
+   * Sends a message to an existing direct message thread - note that you must first use startDM() to start a thread.
+   * @method
+   * @param {String} chatID - alphanumeric ID of the chat to send to
+   * @param {String} text - text content of message
+   * @param {String} clientID - alphanumeric device ID
+   * @param {SidechatAsset[]} - array of assets to send
+   * @param {Boolean} anonymous - whether the DM should be sent anonymously
+   * @since 2.4.4
+   */
+  sendDM = async (chatID, text, clientID, assets = [], anonymous = false) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/chats/send`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          chat_id: chatID,
+          text: text,
+          client_id: clientID,
+          anonymous: anonymous,
+          assets: assets,
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to fetch DMs.`);
+    }
+  };
+
+  /**
+   * Creates a new direct message thread
+   * @method
+   * @param {String} text - text content of message
+   * @param {String} clientID - alphanumeric ID of devide
+   * @param {String} postID - alphanumeric ID of post or comment
+   * @param {Boolean} anonymous - whether the DM should be sent anonymously
+   * @param {"feed"} postContext - context of post (mostly undocumented, defaults to "feed")
+   * @since 2.4.4
+   */
+  startDM = async (
+    text,
+    clientID,
+    postID,
+    anonymous = false,
+    postContext = "feed"
+  ) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/chats/send`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          text: text,
+          client_id: clientID,
+          post_id: postID,
+          anonymous: anonymous,
+          post_context: postContext,
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to fetch DMs.`);
     }
   };
 }
