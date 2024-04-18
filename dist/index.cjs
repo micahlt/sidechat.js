@@ -1242,7 +1242,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`${this.apiRoot}/v1/chats/send`, {
+      const res = await fetch(`${this.apiRoot}/v1/chats/start`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,

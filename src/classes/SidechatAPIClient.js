@@ -1046,7 +1046,7 @@ class SidechatAPIClient {
       return await json;
     } catch (err) {
       console.error(err);
-      throw new SidechatAPIError(`Failed to fetch DMs.`);
+      throw new SidechatAPIError(`Failed to send message.`);
     }
   };
 
@@ -1071,7 +1071,7 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
-      const res = await fetch(`${this.apiRoot}/v1/chats/send`, {
+      const res = await fetch(`${this.apiRoot}/v1/chats/start`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
@@ -1089,7 +1089,7 @@ class SidechatAPIClient {
       return await json;
     } catch (err) {
       console.error(err);
-      throw new SidechatAPIError(`Failed to fetch DMs.`);
+      throw new SidechatAPIError(`Failed to start DM.`);
     }
   };
 }
