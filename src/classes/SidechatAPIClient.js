@@ -300,7 +300,7 @@ class SidechatAPIClient {
     try {
       const res = await fetch(
         `${this.apiRoot}/v1/posts?${
-          cursor ? "cursor=" + cursor : ""
+          cursor ? "cursor=" + encodeURIComponent(cursor) + "&" : ""
         }group_id=${groupID}&type=${category}`,
         {
           method: "GET",
