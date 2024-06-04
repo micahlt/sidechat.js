@@ -1,7 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 /**
  * A user-created post or comment, depending on the "type" prop
  * @typedef {Object} SidechatPostOrComment
@@ -348,7 +346,7 @@ class SidechatAPIClient {
       }
       return json;
     } catch (err) {
-      console.error(error);
+      console.error(err);
       throw new SidechatAPIError("Failed to request email verification.");
     }
   };
@@ -377,7 +375,7 @@ class SidechatAPIClient {
         throw new SidechatAPIError(json?.message || "Email is not verified.");
       }
     } catch (err) {
-      console.error(error);
+      console.error(err);
       throw new SidechatAPIError("Email is not verified.");
     }
   };
@@ -406,7 +404,6 @@ class SidechatAPIClient {
         }),
       });
       const json = await res.json();
-      await AsyncStorage.setItem("deviceID", deviceID);
       return json;
     } catch (err) {
       console.error(err);
