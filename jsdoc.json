@@ -23,6 +23,7 @@
     "verbose": true,
     "template": "./node_modules/clean-jsdoc-theme",
     "theme_opts": {
+      "title": "sidechat.js",
       "default_theme": "dark",
       "homepageTitle": "Sidechat.js Documentation",
       "base_url": "https://micahlindley.com/sidechat.js/",
