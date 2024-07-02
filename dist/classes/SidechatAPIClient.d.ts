@@ -228,6 +228,15 @@ declare class SidechatAPIClient {
      */
     deletePostOrComment: (postOrCommentID: string) => Promise<any>;
     /**
+     * Uploads an asset to AWS S3 for use in posts and comments.  Currently photos only
+     * @method
+     * @param {String} uri - URI of the asset to upload
+     * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
+     * @param {String} [name] - filename of the asset
+     * @since 2.5.1
+     */
+    uploadAsset: (uri: string, mimeType: string, name?: string) => Promise<string>;
+    /**
      * Sets the conversation icon of the current user
      * @method
      * @since 2.2.1
@@ -293,11 +302,11 @@ declare class SidechatAPIClient {
      * @param {String} chatID - alphanumeric ID of the chat to send to
      * @param {String} text - text content of message
      * @param {String} clientID - alphanumeric device ID
-     * @param {SidechatAsset[]} - array of assets to send
+     * @param {SidechatAsset[]} assets - array of assets to send
      * @param {Boolean} anonymous - whether the DM should be sent anonymously
      * @since 2.4.4
      */
-    sendDM: (chatID: string, text: string, clientID: string, assets?: any[], anonymous?: boolean) => Promise<any>;
+    sendDM: (chatID: string, text: string, clientID: string, assets?: SidechatAsset[], anonymous?: boolean) => Promise<any>;
     /**
      * Creates a new direct message thread
      * @method

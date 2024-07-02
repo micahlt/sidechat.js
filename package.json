@@ -1,6 +1,6 @@
 {
   "name": "sidechat.js",
-  "version": "2.4.9",
+  "version": "2.5.1",
   "description": "A reverse-engineered API wrapper for Sidechat",
   "type": "module",
   "source": "./src/index.js",

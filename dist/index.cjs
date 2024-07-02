@@ -957,6 +957,65 @@ class SidechatAPIClient {
   };
 
   /**
+   * Uploads an asset to AWS S3 for use in posts and comments.  Currently photos only
+   * @method
+   * @param {String} uri - URI of the asset to upload
+   * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
+   * @param {String} [name] - filename of the asset
+   * @since 2.5.1
+   */
+  uploadAsset = async (uri, mimeType, name = "") => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+
+    let imageType;
+    switch (mimeType) {
+      case "image/png":
+        imageType = "png";
+        break;
+      case "image/jpeg":
+        imageType = "jpeg";
+        break;
+      default:
+        throw new SidechatAPIError("Unsupported image format.");
+    }
+
+    const data = new FormData();
+
+    data.append("image", {
+      name: name,
+      type: mimeType,
+      uri: uri,
+    });
+
+    const urlReq = await this.sendRequest(
+      `/v1/assets/upload_url?content_type=${imageType}`,
+      "GET"
+    );
+    const urlJson = await urlReq.json();
+
+    try {
+      const uploadReq = await fetch(urlJson.upload_url, {
+        body: data.getAll(["image"])[0],
+        method: "PUT",
+        headers: {
+          "Content-Type": mimeType,
+        },
+      });
+      if (uploadReq.status == 200) {
+        return `${API.apiRoot}/v1/assets/library/${urlJson.asset_id}`;
+      } else {
+        throw new SidechatAPIError(
+          `Couldn't upload image - error ${uploadReq.status}`
+        );
+      }
+    } catch (e) {
+      throw new SidechatAPIError(e.message);
+    }
+  };
+
+  /**
    * Sets the conversation icon of the current user
    * @method
    * @since 2.2.1
@@ -1218,7 +1277,7 @@ class SidechatAPIClient {
    * @param {String} chatID - alphanumeric ID of the chat to send to
    * @param {String} text - text content of message
    * @param {String} clientID - alphanumeric device ID
-   * @param {SidechatAsset[]} - array of assets to send
+   * @param {SidechatAsset[]} assets - array of assets to send
    * @param {Boolean} anonymous - whether the DM should be sent anonymously
    * @since 2.4.4
    */
