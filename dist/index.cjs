@@ -962,6 +962,7 @@ class SidechatAPIClient {
    * @param {String} uri - URI of the asset to upload
    * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
    * @param {String} [name] - filename of the asset
+   * @returns {String} URL of the uploaded asset
    * @since 2.5.1
    */
   uploadAsset = async (uri, mimeType, name = "") => {
@@ -997,14 +998,14 @@ class SidechatAPIClient {
 
     try {
       const uploadReq = await fetch(urlJson.upload_url, {
-        body: data.getAll(["image"])[0],
+        body: data.getAll("image")[0],
         method: "PUT",
         headers: {
           "Content-Type": mimeType,
         },
       });
       if (uploadReq.status == 200) {
-        return `${API.apiRoot}/v1/assets/library/${urlJson.asset_id}`;
+        return `${this.apiRoot}/v1/assets/library/${urlJson.asset_id}`;
       } else {
         throw new SidechatAPIError(
           `Couldn't upload image - error ${uploadReq.status}`

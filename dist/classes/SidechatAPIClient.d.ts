@@ -233,9 +233,10 @@ declare class SidechatAPIClient {
      * @param {String} uri - URI of the asset to upload
      * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
      * @param {String} [name] - filename of the asset
+     * @returns {String} URL of the uploaded asset
      * @since 2.5.1
      */
-    uploadAsset: (uri: string, mimeType: string, name?: string) => Promise<string>;
+    uploadAsset: (uri: string, mimeType: string, name?: string) => string;
     /**
      * Sets the conversation icon of the current user
      * @method
