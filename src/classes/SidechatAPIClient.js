@@ -799,20 +799,12 @@ class SidechatAPIClient {
       throw new SidechatAPIError("User is not authenticated.");
     }
 
-    let imageType;
-    switch (mimeType) {
-      case "image/png":
-        imageType = "png";
-        break;
-      case "image/jpeg":
-        imageType = "jpeg";
-        break;
-      default:
-        throw new SidechatAPIError("Unsupported image format.");
+    let imageType = mimeType.split("/")[1];
+    if (!["png", "jpeg", "gif"].includes(imageType)) {
+      throw new SidechatAPIError("Unsupported image format.");
     }
 
     const data = new FormData();
-
     data.append("image", {
       name: name,
       type: mimeType,
