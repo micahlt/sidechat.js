@@ -1,5 +1,7 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 /**
  * A user-created post or comment, depending on the "type" prop
  * @typedef {Object} SidechatPostOrComment
@@ -233,6 +235,35 @@ class SidechatAPIClient {
    */
   setAPIRoot = (url) => {
     this.apiRoot = url;
+  };
+
+  /**
+   * Run an arbitrary API request using the current client's authentication
+   * @method
+   * @param {String} endpoint - API endpoint to request (e.g. "/v1/posts")
+   * @param {"GET"|"POST"|"PUT"|"DELETE"|"PATCH"|"OPTIONS"} [method] - HTTP method to use
+   * @param {Object} [body] - body to send with the request
+   * @param {Object} [headers] - custom headers to send with the request
+   * @param {Boolean} [stripHeaders] - remove the default headers from the request
+   * @since 2.4.9
+   */
+  sendRequest = (
+    endpoint,
+    method = "GET",
+    body = undefined,
+    headers = {},
+    stripHeaders = false
+  ) => {
+    let requestHeaders = this.defaultHeaders;
+    if (stripHeaders) {
+      headers = {};
+    }
+    requestHeaders = { ...requestHeaders, ...headers };
+    return fetch(`${this.apiRoot}${endpoint}`, {
+      headers: { Authorization: `Bearer ${this.userToken}`, ...requestHeaders },
+      body: body,
+      method: method,
+    });
   };
 
   /**

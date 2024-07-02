@@ -43,6 +43,17 @@ declare class SidechatAPIClient {
      */
     setAPIRoot: (url: string) => void;
     /**
+     * Run an arbitrary API request using the current client's authentication
+     * @method
+     * @param {String} endpoint - API endpoint to request (e.g. "/v1/posts")
+     * @param {"GET"|"POST"|"PUT"|"DELETE"|"PATCH"|"OPTIONS"} [method] - HTTP method to use
+     * @param {Object} [body] - body to send with the request
+     * @param {Object} [headers] - custom headers to send with the request
+     * @param {Boolean} [stripHeaders] - remove the default headers from the request
+     * @since 2.4.9
+     */
+    sendRequest: (endpoint: string, method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS", body?: any, headers?: any, stripHeaders?: boolean) => Promise<Response>;
+    /**
      * Initiate the login process with a phone number.  Should be followed up with verifySMSCode().
      * @method
      * @since 1.0.0
