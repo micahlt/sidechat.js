@@ -786,6 +786,66 @@ class SidechatAPIClient {
   };
 
   /**
+   * Votes on a poll attached to a post
+   * @method
+   * @param {String} pollId - alphanumeric ID of poll to vote on
+   * @param {Number} choiceIndex - index of the choice to vote on
+   * @since 2.5.4
+   */
+  voteOnPoll = async (pollId, choiceIndex) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/polls/vote`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          poll_id: pollId,
+          choice: choiceIndex,
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to vote on poll`);
+    }
+  };
+
+  /**
+   * Marks that the user has viewed results on a poll.  Note that this does not actually return the results of the poll.
+   * @method
+   * @param {String} pollId - alphanumeric ID of poll to vote on
+   * @since 2.5.4
+   */
+  viewPollResults = async (pollId) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/polls/view_results`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          poll_id: pollId,
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to mark poll results as viewed.`);
+    }
+  };
+
+  /**
    * Uploads an asset to AWS S3 for use in posts and comments.  Currently photos only
    * @method
    * @param {String} uri - URI of the asset to upload

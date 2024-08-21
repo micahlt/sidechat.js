@@ -14,7 +14,7 @@
  * @prop {SidechatSimpleAsset[]} assets - array of simple assets attached to post or comment
  * @prop {Array} attachments - undocumented
  * @prop {Boolean} dms_disabled - whether or not you can send a DM to creator of post
- * @prop {Array} tags - undocumented
+ * @prop {String[]} tags - undocumented
  * @prop {SidechatIdentity} identity - creator's identity information
  * @prop {Boolean} pinned - undocumented
  * @prop {Boolean} is_saved - undocumented
@@ -22,6 +22,7 @@
  * @prop {"group"} [destination] - undocumented
  * @prop {Number} [comment_count] - number of comments on post (only if type=post)
  * @prop {Boolean} [comments_disabled] - whether or not you can comment on post (only if type=post)
+ * @prop {SidechatPoll} [poll] - poll attached to post (only if the post has a poll)
  * @prop {String} [parent_post_id] - alphanumeric ID of parent post (only if type=comment)
  * @prop {String} [reply_post_id] - alphanumeric ID of comment being replied to, falls back to parent_post_id (only if type=comment)
  * @prop {String} [context] - text content of comment being replied to, falls back to text (only if type=comment)
@@ -154,4 +155,23 @@ export default {};
  * @prop {String} chat_id - alphanumeric ID of the thread in which the message resides
  * @prop {Boolean} authored_by_user - whether or not the current user sent the message
  * @prop {"message"} type - undocumented
+ */
+
+/**
+ * Represents a poll with choices
+ * @typedef {Object} SidechatPoll
+ * @prop {String} id - alphanumeric ID of poll
+ * @prop {String} post_id - alphanumeric ID of post to which poll is attached
+ * @prop {SidechatPollChoice[]} choices - array of poll choices
+ * @prop {Boolean} allows_view_results - whether or not poll results are publicly visible
+ * @prop {Number} view_results_count - number of users who have viewed poll results
+ * @prop {Boolean} participated - whether or not current user has voted in poll
+ */
+
+/**
+ * Represents a poll choice
+ * @typedef {Object} SidechatPollChoice
+ * @prop {Number} count - number of votes for choice
+ * @prop {String} text - user-visible text of choice
+ * @prop {Boolean} selected - whether or not current user has voted for choice
  */

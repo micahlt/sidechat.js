@@ -59,7 +59,7 @@ export type SidechatPostOrComment = {
     /**
      * - undocumented
      */
-    tags: any[];
+    tags: string[];
     /**
      * - creator's identity information
      */
@@ -88,6 +88,10 @@ export type SidechatPostOrComment = {
      * - whether or not you can comment on post (only if type=post)
      */
     comments_disabled?: boolean;
+    /**
+     * - poll attached to post (only if the post has a poll)
+     */
+    poll?: SidechatPoll;
     /**
      * - alphanumeric ID of parent post (only if type=comment)
      */
@@ -385,5 +389,51 @@ export type SidechatDirectMessage = {
      * - undocumented
      */
     type: "message";
+};
+/**
+ * Represents a poll with choices
+ */
+export type SidechatPoll = {
+    /**
+     * - alphanumeric ID of poll
+     */
+    id: string;
+    /**
+     * - alphanumeric ID of post to which poll is attached
+     */
+    post_id: string;
+    /**
+     * - array of poll choices
+     */
+    choices: SidechatPollChoice[];
+    /**
+     * - whether or not poll results are publicly visible
+     */
+    allows_view_results: boolean;
+    /**
+     * - number of users who have viewed poll results
+     */
+    view_results_count: number;
+    /**
+     * - whether or not current user has voted in poll
+     */
+    participated: boolean;
+};
+/**
+ * Represents a poll choice
+ */
+export type SidechatPollChoice = {
+    /**
+     * - number of votes for choice
+     */
+    count: number;
+    /**
+     * - user-visible text of choice
+     */
+    text: string;
+    /**
+     * - whether or not current user has voted for choice
+     */
+    selected: boolean;
 };
 //# sourceMappingURL=SidechatTypes.d.ts.map

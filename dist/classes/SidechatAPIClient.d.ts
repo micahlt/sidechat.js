@@ -228,6 +228,21 @@ declare class SidechatAPIClient {
      */
     deletePostOrComment: (postOrCommentID: string) => Promise<any>;
     /**
+     * Votes on a poll attached to a post
+     * @method
+     * @param {String} pollId - alphanumeric ID of poll to vote on
+     * @param {Number} choiceIndex - index of the choice to vote on
+     * @since 2.5.4
+     */
+    voteOnPoll: (pollId: string, choiceIndex: number) => Promise<any>;
+    /**
+     * Marks that the user has viewed results on a poll.  Note that this does not actually return the results of the poll.
+     * @method
+     * @param {String} pollId - alphanumeric ID of poll to vote on
+     * @since 2.5.4
+     */
+    viewPollResults: (pollId: string) => Promise<any>;
+    /**
      * Uploads an asset to AWS S3 for use in posts and comments.  Currently photos only
      * @method
      * @param {String} uri - URI of the asset to upload
