@@ -1,6 +1,6 @@
 {
   "name": "sidechat.js",
-  "version": "2.5.4",
+  "version": "2.5.5",
   "description": "A reverse-engineered API wrapper for Sidechat",
   "type": "module",
   "source": "./src/index.js",
@@ -45,10 +45,10 @@
   },
   "devDependencies": {
     "clean-jsdoc-theme": "^4.3.0",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "prompt-sync": "^4.2.0",
-    "rollup": "^2.79.1",
+    "rollup": "^2.79.2",
     "rollup-plugin-copy": "^3.5.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.7.2"
   }
 }

@@ -35,7 +35,7 @@ async function main() {
       const id = prompt("ID of post to comment on? ");
       const group = prompt("Group ID of post? ");
       const replyID = prompt("Reply ID? (optional) ");
-      const res = await API.createComment(id, "woah lol", group, replyID);
+      const res = await API.createComment(id, "ye", group, replyID);
       console.log(res);
     } else if (action == "get comments") {
       const id = prompt("ID of post to get comments from? ");

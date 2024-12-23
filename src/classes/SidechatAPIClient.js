@@ -327,8 +327,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `${this.apiRoot}/v1/posts?${
-          cursor ? "cursor=" + encodeURIComponent(cursor) + "&" : ""
+        `${this.apiRoot}/v1/posts?${cursor ? "cursor=" + encodeURIComponent(cursor) + "&" : ""
         }group_id=${groupID}&type=${category}`,
         {
           method: "GET",
@@ -664,6 +663,7 @@ class SidechatAPIClient {
    * @param {String} text - text content of comment
    * @param {String} groupID - alphanumeric ID of group in which the parent post resides
    * @param {String} [replyCommentID] - alphanumeric ID of comment to reply to.  Falls back to parentPostID
+   * @param {String} [topLevelReplyID] - alphanumeric ID of the top-level comment to reply to.  Used only when replying to replies.  Falls back to parentPostID
    * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach
    * @param {Boolean} [disableDMs] - prevent direct messages being sent to comment's author
    * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on comment
@@ -673,7 +673,8 @@ class SidechatAPIClient {
     parentPostID,
     text,
     groupID,
-    replyCommentID = parentPostID,
+    replyCommentID,
+    topLevelReplyID,
     assetList = [],
     disableDMs = false,
     anonymous = false
@@ -693,7 +694,8 @@ class SidechatAPIClient {
           assets: assetList,
           group_ids: [groupID],
           text: text,
-          reply_post_id: replyCommentID,
+          reply_post_id: topLevelReplyID || replyCommentID || parentPostID,
+          reply_comment_post_id: replyCommentID || parentPostID,
           parent_post_id: parentPostID,
           dms_disabled: disableDMs,
           using_identity: !anonymous,
