@@ -29,6 +29,16 @@
       "base_url": "https://micahlindley.com/sidechat.js/",
       "menu": [
         {
+          "title": "GitHub",
+          "link": "https://github.com/micahlt/sidechat.js",
+          "target": "_blank"
+        },
+        {
+          "title": "NPM",
+          "link": "https://www.npmjs.com/package/sidechat.js",
+          "target": "_blank"
+        },
+        {
           "title": "Offsides (Sidechat for Android)",
           "link": "https://offsides.micahlindley.com",
           "target": "_blank"
