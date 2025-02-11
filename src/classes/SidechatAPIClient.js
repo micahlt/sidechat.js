@@ -897,7 +897,7 @@ class SidechatAPIClient {
   };
 
   /**
-   * Sets the conversation icon of the current user
+   * Sets the conversation icon of a user
    * @method
    * @since 2.2.1
    * @param {String} userID - alphanumeric ID of user
@@ -934,6 +934,13 @@ class SidechatAPIClient {
     }
   };
 
+  /**
+   * Sets the bio text of a user
+   * @method
+   * @since 2.5.6
+   * @param {String} userID - alphanumeric ID of user
+   * @param {String} bio - text to set as bio
+   */
   setUserBio = async (userID, bio) => {
     if (!this.userToken) {
       throw new SidechatAPIError("User is not authenticated.");

@@ -254,7 +254,7 @@ declare class SidechatAPIClient {
      */
     uploadAsset: (uri: string, mimeType: string, name?: string) => string;
     /**
-     * Sets the conversation icon of the current user
+     * Sets the conversation icon of a user
      * @method
      * @since 2.2.1
      * @param {String} userID - alphanumeric ID of user
@@ -263,6 +263,14 @@ declare class SidechatAPIClient {
      * @param {String} secondaryColor - hex string (including #) of secondary color
      */
     setUserIcon: (userID: string, emoji: string, primaryColor: string, secondaryColor: string) => Promise<any>;
+    /**
+     * Sets the bio text of a user
+     * @method
+     * @since 2.5.6
+     * @param {String} userID - alphanumeric ID of user
+     * @param {String} bio - text to set as bio
+     */
+    setUserBio: (userID: string, bio: string) => Promise<any>;
     /**
      * Checks if user can set their username to a string
      * @method

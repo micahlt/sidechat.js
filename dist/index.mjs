@@ -1060,10 +1060,7 @@ class SidechatAPIClient {
       uri: uri,
     });
 
-    const urlReq = await this.sendRequest(
-      `/v1/assets/upload_url?content_type=${imageType}`,
-      "GET"
-    );
+    const urlReq = await this.sendRequest(`/v1/assets/upload_url?content_type=${imageType}`);
     const urlJson = await urlReq.json();
 
     try {
@@ -1087,7 +1084,7 @@ class SidechatAPIClient {
   };
 
   /**
-   * Sets the conversation icon of the current user
+   * Sets the conversation icon of a user
    * @method
    * @since 2.2.1
    * @param {String} userID - alphanumeric ID of user
@@ -1121,6 +1118,37 @@ class SidechatAPIClient {
     } catch (err) {
       console.error(err);
       throw new SidechatAPIError(`Failed to set icon.`);
+    }
+  };
+
+  /**
+   * Sets the bio text of a user
+   * @method
+   * @since 2.5.6
+   * @param {String} userID - alphanumeric ID of user
+   * @param {String} bio - text to set as bio
+   */
+  setUserBio = async (userID, bio) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/users/${userID}`, {
+        method: "PATCH",
+        headers: {
+          ...this.defaultHeaders,
+          "App-Version": "5.4.22",
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          bio: bio
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to set bio.`);
     }
   };
 
