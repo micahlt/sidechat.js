@@ -164,6 +164,14 @@ declare class SidechatAPIClient {
      */
     getAvailableGroups: (onePage?: boolean) => SidechatGroup[];
     /**
+     * Searches for new groups based on a query keyword
+     * @method
+     * @since 2.6.0
+     * @param {String} query - the string to search for.  This will be encoded, so strings with spaces and special characters are okay.
+     * @returns {SidechatGroup[]}
+     */
+    searchAvailableGroups: (query: string) => SidechatGroup[];
+    /**
      * Retrieves the entire accessible asset library.  Be warned that as of the time of this documentation, it's a 1.5MB JSON download and this request is very expensive.
      * @method
      * @since 2.0.6
@@ -288,6 +296,22 @@ declare class SidechatAPIClient {
      */
     setUsername: (userID: string, username: string) => Promise<any>;
     /**
+     * Fetches a public user profile
+     * @method
+     * @since 2.6.0
+     * @param {String} username - username of the user to fetch
+     * @returns {SidechatProfile}
+     */
+    getUserProfile: (username: string) => SidechatProfile;
+    /**
+     * Fetches a public user's posts
+     * @method
+     * @since 2.6.0
+     * @param {String} username - username of the user to fetch
+     * @returns {SidechatPostOrComment[]}
+     */
+    getUserPosts: (username: string) => SidechatPostOrComment[];
+    /**
      * Marks an activity item as read
      * @method
      * @since 2.3.2
@@ -301,11 +325,16 @@ declare class SidechatAPIClient {
      */
     getGroupChats: () => Promise<any>;
     /**
-     * Joins a group chat
+     * Joins a group chat.  To mimic the official client, use the user's display name and icon by default.
      * @method
+     * @param {String} groupChatID - alphanumeric ID of group chat to join
+     * @param {String} displayName - display name to use in chat
+     * @param {String} emoji - emoji to use as icon
+     * @param {String} primaryColor - hex string of primary color
+     * @param {String} secondaryColor - hex string of secondary color
      * @since 2.3.5
      */
-    joinGroupChat: (groupChatID: any, displayName: any, emoji: any, primaryColor: any, secondaryColor: any) => Promise<any>;
+    joinGroupChat: (groupChatID: string, displayName: string, emoji: string, primaryColor: string, secondaryColor: string) => Promise<any>;
     /**
      * Gets a list of the user's direct messages
      * @method

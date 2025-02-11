@@ -3,7 +3,7 @@
  * @typedef {Object} SidechatPostOrComment
  * @prop {"post"|"comment"} type - whether this object represents a post or a comment on a post
  * @prop {String} id - alphanumeric ID of post or comment
- * @prop {Boolean} authored_by_user - undocumented
+ * @prop {Boolean} authored_by_user - whether or not the post or comment was created by the current user
  * @prop {String} alias - post creator's name in-app
  * @prop {String} group_id - alphanumeric ID of group
  * @prop {SidechatGroup} group - group in which post or comment was created
@@ -17,8 +17,8 @@
  * @prop {String[]} tags - undocumented
  * @prop {SidechatIdentity} identity - creator's identity information
  * @prop {Boolean} pinned - undocumented
- * @prop {Boolean} is_saved - undocumented
- * @prop {"following"|"not_following"} follow_status - undocumented
+ * @prop {Boolean} is_saved - whether or not the current user has saved the post
+ * @prop {"following"|"not_following"} follow_status - whether or not the current user should recieve activity notifications for the post
  * @prop {"group"} [destination] - undocumented
  * @prop {Number} [comment_count] - number of comments on post (only if type=post)
  * @prop {Boolean} [comments_disabled] - whether or not you can comment on post (only if type=post)
@@ -83,6 +83,14 @@
  */
 
 /**
+ * A conversation icon associated with a user
+ * @typedef {Object} SidechatIcon
+ * @prop {String} emoji - unicode emoji character
+ * @prop {String} color - primary hex color code
+ * @prop {String} secondary_color - secondary hex color code
+ */
+
+/**
  * The current user's information
  * @typedef {Object} SidechatCurrentUser
  * @prop {String} id - alphanumeric ID of current user
@@ -93,6 +101,22 @@
  * @prop {Array} roles - undocumented
  * @prop {String} emailDomain - domain of verified email address on account
  * @prop {String} wildcardEmailDomain - domain of verified email address on account, preceeded by *. to support subdomains
+ */
+
+/**
+ * A user's public profile
+ * @typedef {Object} SidechatProfile
+ * @prop {String} id - alphanumeric ID of user
+ * @prop {String} name - public-facing username
+ * @prop {SidechatIcon} conversation_icon - icon associated with user
+ * @prop {Boolean} description - the user bio
+ * @prop {String} index_name - undocumented
+ * @prop {String} analytics_name - undocumented
+ * @prop {String} color - undocumented
+ * @prop {String} share_color_start - undocumented
+ * @prop {String} share_color_end - undocumented
+ * @prop {"account"} group_join_type - undocumented
+ * @prop {"public_to_all"} group_visibility - the profile visibility status
  */
 
 /**
@@ -129,7 +153,6 @@
  * @prop {SidechatCursorString} cursor
  */
 
-export default {};
 
 /**
  * A direct message thread
@@ -166,7 +189,7 @@ export default {};
  * @prop {Boolean} allows_view_results - whether or not poll results are publicly visible
  * @prop {Number} view_results_count - number of users who have viewed poll results
  * @prop {Boolean} participated - whether or not current user has voted in poll
- */
+*/
 
 /**
  * Represents a poll choice
@@ -174,4 +197,6 @@ export default {};
  * @prop {Number} count - number of votes for choice
  * @prop {String} text - user-visible text of choice
  * @prop {Boolean} selected - whether or not current user has voted for choice
- */
+*/
+
+export default {};

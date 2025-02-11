@@ -13,7 +13,7 @@ export type SidechatPostOrComment = {
      */
     id: string;
     /**
-     * - undocumented
+     * - whether or not the post or comment was created by the current user
      */
     authored_by_user: boolean;
     /**
@@ -69,11 +69,11 @@ export type SidechatPostOrComment = {
      */
     pinned: boolean;
     /**
-     * - undocumented
+     * - whether or not the current user has saved the post
      */
     is_saved: boolean;
     /**
-     * - undocumented
+     * - whether or not the current user should recieve activity notifications for the post
      */
     follow_status: "following" | "not_following";
     /**
@@ -247,6 +247,23 @@ export type SidechatIdentity = {
     posted_with_username: boolean;
 };
 /**
+ * A conversation icon associated with a user
+ */
+export type SidechatIcon = {
+    /**
+     * - unicode emoji character
+     */
+    emoji: string;
+    /**
+     * - primary hex color code
+     */
+    color: string;
+    /**
+     * - secondary hex color code
+     */
+    secondary_color: string;
+};
+/**
  * The current user's information
  */
 export type SidechatCurrentUser = {
@@ -279,6 +296,55 @@ export type SidechatCurrentUser = {
      * - domain of verified email address on account, preceeded by *. to support subdomains
      */
     wildcardEmailDomain: string;
+};
+/**
+ * A user's public profile
+ */
+export type SidechatProfile = {
+    /**
+     * - alphanumeric ID of user
+     */
+    id: string;
+    /**
+     * - public-facing username
+     */
+    name: string;
+    /**
+     * - icon associated with user
+     */
+    conversation_icon: SidechatIcon;
+    /**
+     * - the user bio
+     */
+    description: boolean;
+    /**
+     * - undocumented
+     */
+    index_name: string;
+    /**
+     * - undocumented
+     */
+    analytics_name: string;
+    /**
+     * - undocumented
+     */
+    color: string;
+    /**
+     * - undocumented
+     */
+    share_color_start: string;
+    /**
+     * - undocumented
+     */
+    share_color_end: string;
+    /**
+     * - undocumented
+     */
+    group_join_type: "account";
+    /**
+     * - the profile visibility status
+     */
+    group_visibility: "public_to_all";
 };
 /**
  * Representation of a group membership

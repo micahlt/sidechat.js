@@ -7,7 +7,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
  * @typedef {Object} SidechatPostOrComment
  * @prop {"post"|"comment"} type - whether this object represents a post or a comment on a post
  * @prop {String} id - alphanumeric ID of post or comment
- * @prop {Boolean} authored_by_user - undocumented
+ * @prop {Boolean} authored_by_user - whether or not the post or comment was created by the current user
  * @prop {String} alias - post creator's name in-app
  * @prop {String} group_id - alphanumeric ID of group
  * @prop {SidechatGroup} group - group in which post or comment was created
@@ -21,8 +21,8 @@ Object.defineProperty(exports, '__esModule', { value: true });
  * @prop {String[]} tags - undocumented
  * @prop {SidechatIdentity} identity - creator's identity information
  * @prop {Boolean} pinned - undocumented
- * @prop {Boolean} is_saved - undocumented
- * @prop {"following"|"not_following"} follow_status - undocumented
+ * @prop {Boolean} is_saved - whether or not the current user has saved the post
+ * @prop {"following"|"not_following"} follow_status - whether or not the current user should recieve activity notifications for the post
  * @prop {"group"} [destination] - undocumented
  * @prop {Number} [comment_count] - number of comments on post (only if type=post)
  * @prop {Boolean} [comments_disabled] - whether or not you can comment on post (only if type=post)
@@ -87,6 +87,14 @@ Object.defineProperty(exports, '__esModule', { value: true });
  */
 
 /**
+ * A conversation icon associated with a user
+ * @typedef {Object} SidechatIcon
+ * @prop {String} emoji - unicode emoji character
+ * @prop {String} color - primary hex color code
+ * @prop {String} secondary_color - secondary hex color code
+ */
+
+/**
  * The current user's information
  * @typedef {Object} SidechatCurrentUser
  * @prop {String} id - alphanumeric ID of current user
@@ -97,6 +105,22 @@ Object.defineProperty(exports, '__esModule', { value: true });
  * @prop {Array} roles - undocumented
  * @prop {String} emailDomain - domain of verified email address on account
  * @prop {String} wildcardEmailDomain - domain of verified email address on account, preceeded by *. to support subdomains
+ */
+
+/**
+ * A user's public profile
+ * @typedef {Object} SidechatProfile
+ * @prop {String} id - alphanumeric ID of user
+ * @prop {String} name - public-facing username
+ * @prop {SidechatIcon} conversation_icon - icon associated with user
+ * @prop {Boolean} description - the user bio
+ * @prop {String} index_name - undocumented
+ * @prop {String} analytics_name - undocumented
+ * @prop {String} color - undocumented
+ * @prop {String} share_color_start - undocumented
+ * @prop {String} share_color_end - undocumented
+ * @prop {"account"} group_join_type - undocumented
+ * @prop {"public_to_all"} group_visibility - the profile visibility status
  */
 
 /**
@@ -133,7 +157,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
  * @prop {SidechatCursorString} cursor
  */
 
-var SidechatTypes = {};
 
 /**
  * A direct message thread
@@ -170,7 +193,7 @@ var SidechatTypes = {};
  * @prop {Boolean} allows_view_results - whether or not poll results are publicly visible
  * @prop {Number} view_results_count - number of users who have viewed poll results
  * @prop {Boolean} participated - whether or not current user has voted in poll
- */
+*/
 
 /**
  * Represents a poll choice
@@ -178,7 +201,9 @@ var SidechatTypes = {};
  * @prop {Number} count - number of votes for choice
  * @prop {String} text - user-visible text of choice
  * @prop {Boolean} selected - whether or not current user has voted for choice
- */
+*/
+
+var SidechatTypes = {};
 
 /**
  * Throwable error caused by the Sidechat API
@@ -735,6 +760,33 @@ class SidechatAPIClient {
   };
 
   /**
+   * Searches for new groups based on a query keyword
+   * @method
+   * @since 2.6.0
+   * @param {String} query - the string to search for.  This will be encoded, so strings with spaces and special characters are okay.
+   * @returns {SidechatGroup[]}
+   */
+  searchAvailableGroups = async (query) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/groups/explore/search?term=${encodeURIComponent(query)}`, {
+        method: "GET",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+      });
+      const json = await res.json();
+      return await json.results;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to search groups.`);
+    }
+  };
+
+  /**
    * Retrieves the entire accessible asset library.  Be warned that as of the time of this documentation, it's a 1.5MB JSON download and this request is very expensive.
    * @method
    * @since 2.0.6
@@ -1220,6 +1272,60 @@ class SidechatAPIClient {
   };
 
   /**
+   * Fetches a public user profile
+   * @method
+   * @since 2.6.0
+   * @param {String} username - username of the user to fetch
+   * @returns {SidechatProfile}
+   */
+  getUserProfile = async (username) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/groups/username?username=${username}`, {
+        method: "GET",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        }
+      });
+      const json = await res.json();
+      return await json.group;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to set icon.`);
+    }
+  };
+
+  /**
+   * Fetches a public user's posts
+   * @method
+   * @since 2.6.0
+   * @param {String} username - username of the user to fetch
+   * @returns {SidechatPostOrComment[]}
+   */
+  getUserPosts = async (username) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/users/posts?username=${username}`, {
+        method: "GET",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        }
+      });
+      const json = await res.json();
+      return await json.posts;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to set icon.`);
+    }
+  };
+
+  /**
    * Marks an activity item as read
    * @method
    * @since 2.3.2
@@ -1274,8 +1380,13 @@ class SidechatAPIClient {
   };
 
   /**
-   * Joins a group chat
+   * Joins a group chat.  To mimic the official client, use the user's display name and icon by default.
    * @method
+   * @param {String} groupChatID - alphanumeric ID of group chat to join
+   * @param {String} displayName - display name to use in chat
+   * @param {String} emoji - emoji to use as icon
+   * @param {String} primaryColor - hex string of primary color
+   * @param {String} secondaryColor - hex string of secondary color
    * @since 2.3.5
    */
   joinGroupChat = async (
