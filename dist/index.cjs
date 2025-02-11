@@ -970,7 +970,8 @@ class SidechatAPIClient {
     assetList = [],
     disableDMs = false,
     disableComments = false,
-    anonymous = false
+    anonymous = false,
+    repostId = undefined
   ) => {
     if (!this.userToken) {
       throw new SidechatAPIError("User is not authenticated.");
@@ -991,6 +992,7 @@ class SidechatAPIClient {
           dms_disabled: disableDMs,
           comments_disabled: disableComments,
           using_identity: !anonymous,
+          quote_post_id: repostId
         }),
       });
       const json = await res.json();

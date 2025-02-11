@@ -228,7 +228,7 @@ declare class SidechatAPIClient {
      * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
      * @returns {SidechatPostOrComment} the created post
      */
-    createPost: (text: string, groupID: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean) => SidechatPostOrComment;
+    createPost: (text: string, groupID: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: any) => SidechatPostOrComment;
     /**
      * Deletes a post or comment that the user created
      * @method
