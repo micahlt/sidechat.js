@@ -1562,6 +1562,63 @@ class SidechatAPIClient {
       throw new SidechatAPIError(`Failed to start DM.`);
     }
   };
+
+  /**
+   * Hides posts from user
+   * @method
+   * @param {String} postID - alphanumeric ID of post to hide
+   * @since 2.6.2
+   */
+  hidePostsFromUser = async (postID) => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/posts/hide_post_from_user`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({
+          post_id: postID,
+          post_context: "feed",
+          report: false
+        }),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to hide post.`);
+    }
+  };
+
+  /**
+   * Unhides all posts from all users
+   * @method
+   * @since 2.6.2
+   */
+  unhidePostsFromAllUsers = async () => {
+    if (!this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    try {
+      const res = await fetch(`${this.apiRoot}/v1/users/unhide_all`, {
+        method: "POST",
+        headers: {
+          ...this.defaultHeaders,
+          Authorization: `Bearer ${this.userToken}`,
+        },
+        body: JSON.stringify({}),
+      });
+      const json = await res.json();
+      return await json;
+    } catch (err) {
+      console.error(err);
+      throw new SidechatAPIError(`Failed to unhide post.`);
+    }
+  };
 }
 
 /**

@@ -372,5 +372,18 @@ declare class SidechatAPIClient {
      * @since 2.4.4
      */
     startDM: (text: string, clientID: string, postID: string, anonymous?: boolean, postContext?: "feed") => Promise<any>;
+    /**
+     * Hides posts from user
+     * @method
+     * @param {String} postID - alphanumeric ID of post to hide
+     * @since 2.6.2
+     */
+    hidePostsFromUser: (postID: string) => Promise<any>;
+    /**
+     * Unhides all posts from all users
+     * @method
+     * @since 2.6.2
+     */
+    unhidePostsFromAllUsers: () => Promise<any>;
 }
 //# sourceMappingURL=SidechatAPIClient.d.ts.map
