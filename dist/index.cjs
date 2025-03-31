@@ -447,6 +447,8 @@ class SidechatAPIClient {
       const json = await res.json();
       if (json.verified_email_updates_response) {
         return json.verified_email_updates_response;
+      } else if (json.changing_phone_number_verified_email_user) {
+        return json.changing_phone_number_verified_email_user;
       } else {
         throw new SidechatAPIError(json?.message || "Email is not verified.");
       }
