@@ -537,7 +537,7 @@ class SidechatAPIClient {
    * @param {String} groupID - group ID
    * @param {"hot"|"recent"|"top"} category - category to filter posts
    * @param {SidechatCursorString} [cursor] - cursor string
-   * @returns {SidechatPostsAndCursor} List of posts and cursor
+   * @returns {Promise<SidechatPostsAndCursor>} List of posts and cursor
    */
   getGroupPosts = async (groupID, category = "hot", cursor) => {
     if (!this.userToken) {
@@ -600,7 +600,7 @@ class SidechatAPIClient {
    * @since 2.3.0
    * @param {String} postID - ID of post to fetch
    * @param {Boolean} includeDeleted - undocumented
-   * @returns {SidechatPostOrComment} post object
+   * @returns {Promise<SidechatPostOrComment>} post object
    */
   getPost = async (postID, includeDeleted = false) => {
     if (!this.userToken) {
@@ -630,7 +630,7 @@ class SidechatAPIClient {
    * @method
    * @since 2.3.5
    * @param {"posts"|"comments"} contentType - type of user content to fetch
-   * @returns {SidechatPostOrComment[]} post object
+   * @returns {Promise<SidechatPostOrComment[]>} post object
    */
   getUserContent = async (contentType) => {
     if (!this.userToken) {
@@ -662,7 +662,7 @@ class SidechatAPIClient {
    * @method
    * @since 2.0.0-alpha.0
    * @param {String} postID - post ID to get comments for
-   * @returns {SidechatPostOrComment[]} list of comments
+   * @returns {Promise<SidechatPostOrComment[]>} list of comments
    */
   getPostComments = async (postID) => {
     if (!this.userToken) {
@@ -738,7 +738,7 @@ class SidechatAPIClient {
    * @method
    * @since 2.0.0-alpha.0
    * @param {Boolean} onePage - whether or not results should be returned as a single page
-   * @returns {SidechatGroup[]}
+   * @returns {Promise<SidechatGroup[]>}
    */
   getAvailableGroups = async (onePage = true) => {
     if (!this.userToken) {
@@ -766,7 +766,7 @@ class SidechatAPIClient {
    * @method
    * @since 2.6.0
    * @param {String} query - the string to search for.  This will be encoded, so strings with spaces and special characters are okay.
-   * @returns {SidechatGroup[]}
+   * @returns {Promise<SidechatGroup[]>}
    */
   searchAvailableGroups = async (query) => {
     if (!this.userToken) {
@@ -792,7 +792,7 @@ class SidechatAPIClient {
    * Retrieves the entire accessible asset library.  Be warned that as of the time of this documentation, it's a 1.5MB JSON download and this request is very expensive.
    * @method
    * @since 2.0.6
-   * @returns {SidechatLibraryAsset[]}
+   * @returns {Promise<SidechatLibraryAsset[]>}
    */
   getAssetLibrary = async () => {
     if (!this.userToken) {
@@ -818,7 +818,7 @@ class SidechatAPIClient {
    * Gets the current authenticated user and a list of the groups of which they are members.
    * @method
    * @since 2.1.0
-   * @returns {SidechatCurrentUser}
+   * @returns {Promise<SidechatCurrentUser>}
    */
   getCurrentUser = async () => {
     if (!this.userToken) {
@@ -845,7 +845,7 @@ class SidechatAPIClient {
    * @method
    * @since 2.1.0
    * @param {String} [groupID] - alphanumeric ID of a group to get.  Falls back to user's primary group.
-   * @returns {SidechatGroup}
+   * @returns {Promise<SidechatGroup>}
    */
   getGroupMetadata = async (groupID = "") => {
     if (!this.userToken) {
@@ -912,7 +912,7 @@ class SidechatAPIClient {
    * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach
    * @param {Boolean} [disableDMs] - prevent direct messages being sent to comment's author
    * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on comment
-   * @returns {SidechatPostOrComment} created comment
+   * @returns {Promise<SidechatPostOrComment>} created comment
    */
   createComment = async (
     parentPostID,
@@ -964,7 +964,7 @@ class SidechatAPIClient {
    * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
    * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
    * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
-   * @returns {SidechatPostOrComment} the created post
+   * @returns {Promise<SidechatPostOrComment>} the created post
    */
   createPost = async (
     text,
@@ -1100,7 +1100,7 @@ class SidechatAPIClient {
    * @param {String} uri - URI of the asset to upload
    * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
    * @param {String} [name] - filename of the asset
-   * @returns {String} URL of the uploaded asset
+   * @returns {Promise<String>} URL of the uploaded asset
    * @since 2.5.1
    */
   uploadAsset = async (uri, mimeType, name = "") => {
@@ -1217,7 +1217,7 @@ class SidechatAPIClient {
    * @method
    * @since 2.3.6
    * @param {String} username - string to check
-   * @returns {Boolean} whether or not username is valid and unused
+   * @returns {Promise<Boolean>} whether or not username is valid and unused
    */
   checkUsername = async (username) => {
     if (!this.userToken) {
@@ -1280,7 +1280,7 @@ class SidechatAPIClient {
    * @method
    * @since 2.6.0
    * @param {String} username - username of the user to fetch
-   * @returns {SidechatProfile}
+   * @returns {Promise<SidechatProfile>}
    */
   getUserProfile = async (username) => {
     if (!this.userToken) {
@@ -1307,7 +1307,7 @@ class SidechatAPIClient {
    * @method
    * @since 2.6.0
    * @param {String} username - username of the user to fetch
-   * @returns {SidechatPostOrComment[]}
+   * @returns {Promise<SidechatPostOrComment[]>}
    */
   getUserPosts = async (username) => {
     if (!this.userToken) {
@@ -1431,7 +1431,7 @@ class SidechatAPIClient {
   /**
    * Gets a list of the user's direct messages
    * @method
-   * @returns {SidechatDirectThread[]}
+   * @returns {Promise<SidechatDirectThread[]>}
    * @since 2.4.4
    */
   getDMs = async () => {
@@ -1463,7 +1463,7 @@ class SidechatAPIClient {
    * Gets a single direct message thread
    * @method
    * @param {String} id - alphanumeric ID of the chat to fetch
-   * @returns {SidechatDirectThread}
+   * @returns {Promise<SidechatDirectThread>}
    * @since 2.4.4
    */
   getDMThread = async (id) => {

@@ -119,9 +119,9 @@ declare class SidechatAPIClient {
      * @param {String} groupID - group ID
      * @param {"hot"|"recent"|"top"} category - category to filter posts
      * @param {SidechatCursorString} [cursor] - cursor string
-     * @returns {SidechatPostsAndCursor} List of posts and cursor
+     * @returns {Promise<SidechatPostsAndCursor>} List of posts and cursor
      */
-    getGroupPosts: (groupID: string, category?: "hot" | "recent" | "top", cursor?: SidechatCursorString) => SidechatPostsAndCursor;
+    getGroupPosts: (groupID: string, category?: "hot" | "recent" | "top", cursor?: SidechatCursorString) => Promise<SidechatPostsAndCursor>;
     /**
      * Upvote or downvote, or unvote a post
      * @method
@@ -136,63 +136,63 @@ declare class SidechatAPIClient {
      * @since 2.3.0
      * @param {String} postID - ID of post to fetch
      * @param {Boolean} includeDeleted - undocumented
-     * @returns {SidechatPostOrComment} post object
+     * @returns {Promise<SidechatPostOrComment>} post object
      */
-    getPost: (postID: string, includeDeleted?: boolean) => SidechatPostOrComment;
+    getPost: (postID: string, includeDeleted?: boolean) => Promise<SidechatPostOrComment>;
     /**
      * Fetches the posts or comments that the user has created
      * @method
      * @since 2.3.5
      * @param {"posts"|"comments"} contentType - type of user content to fetch
-     * @returns {SidechatPostOrComment[]} post object
+     * @returns {Promise<SidechatPostOrComment[]>} post object
      */
-    getUserContent: (contentType: "posts" | "comments") => SidechatPostOrComment[];
+    getUserContent: (contentType: "posts" | "comments") => Promise<SidechatPostOrComment[]>;
     /**
      * Get all the commments on a post
      * @method
      * @since 2.0.0-alpha.0
      * @param {String} postID - post ID to get comments for
-     * @returns {SidechatPostOrComment[]} list of comments
+     * @returns {Promise<SidechatPostOrComment[]>} list of comments
      */
-    getPostComments: (postID: string) => SidechatPostOrComment[];
+    getPostComments: (postID: string) => Promise<SidechatPostOrComment[]>;
     /**
      * Gets groups to be displayed on the "Explore Groups" page
      * @method
      * @since 2.0.0-alpha.0
      * @param {Boolean} onePage - whether or not results should be returned as a single page
-     * @returns {SidechatGroup[]}
+     * @returns {Promise<SidechatGroup[]>}
      */
-    getAvailableGroups: (onePage?: boolean) => SidechatGroup[];
+    getAvailableGroups: (onePage?: boolean) => Promise<SidechatGroup[]>;
     /**
      * Searches for new groups based on a query keyword
      * @method
      * @since 2.6.0
      * @param {String} query - the string to search for.  This will be encoded, so strings with spaces and special characters are okay.
-     * @returns {SidechatGroup[]}
+     * @returns {Promise<SidechatGroup[]>}
      */
-    searchAvailableGroups: (query: string) => SidechatGroup[];
+    searchAvailableGroups: (query: string) => Promise<SidechatGroup[]>;
     /**
      * Retrieves the entire accessible asset library.  Be warned that as of the time of this documentation, it's a 1.5MB JSON download and this request is very expensive.
      * @method
      * @since 2.0.6
-     * @returns {SidechatLibraryAsset[]}
+     * @returns {Promise<SidechatLibraryAsset[]>}
      */
-    getAssetLibrary: () => SidechatLibraryAsset[];
+    getAssetLibrary: () => Promise<SidechatLibraryAsset[]>;
     /**
      * Gets the current authenticated user and a list of the groups of which they are members.
      * @method
      * @since 2.1.0
-     * @returns {SidechatCurrentUser}
+     * @returns {Promise<SidechatCurrentUser>}
      */
-    getCurrentUser: () => SidechatCurrentUser;
+    getCurrentUser: () => Promise<SidechatCurrentUser>;
     /**
      * Gets the metadata of a group from its ID
      * @method
      * @since 2.1.0
      * @param {String} [groupID] - alphanumeric ID of a group to get.  Falls back to user's primary group.
-     * @returns {SidechatGroup}
+     * @returns {Promise<SidechatGroup>}
      */
-    getGroupMetadata: (groupID?: string) => SidechatGroup;
+    getGroupMetadata: (groupID?: string) => Promise<SidechatGroup>;
     /**
      * Joins or leaves a group
      * @method
@@ -213,9 +213,9 @@ declare class SidechatAPIClient {
      * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach
      * @param {Boolean} [disableDMs] - prevent direct messages being sent to comment's author
      * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on comment
-     * @returns {SidechatPostOrComment} created comment
+     * @returns {Promise<SidechatPostOrComment>} created comment
      */
-    createComment: (parentPostID: string, text: string, groupID: string, replyCommentID?: string, topLevelReplyID?: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, anonymous?: boolean) => SidechatPostOrComment;
+    createComment: (parentPostID: string, text: string, groupID: string, replyCommentID?: string, topLevelReplyID?: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, anonymous?: boolean) => Promise<SidechatPostOrComment>;
     /**
      * Creates a new post in the specified group
      * @method
@@ -226,9 +226,9 @@ declare class SidechatAPIClient {
      * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
      * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
      * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
-     * @returns {SidechatPostOrComment} the created post
+     * @returns {Promise<SidechatPostOrComment>} the created post
      */
-    createPost: (text: string, groupID: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: any) => SidechatPostOrComment;
+    createPost: (text: string, groupID: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: any) => Promise<SidechatPostOrComment>;
     /**
      * Deletes a post or comment that the user created
      * @method
@@ -257,10 +257,10 @@ declare class SidechatAPIClient {
      * @param {String} uri - URI of the asset to upload
      * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
      * @param {String} [name] - filename of the asset
-     * @returns {String} URL of the uploaded asset
+     * @returns {Promise<String>} URL of the uploaded asset
      * @since 2.5.1
      */
-    uploadAsset: (uri: string, mimeType: string, name?: string) => string;
+    uploadAsset: (uri: string, mimeType: string, name?: string) => Promise<string>;
     /**
      * Sets the conversation icon of a user
      * @method
@@ -284,9 +284,9 @@ declare class SidechatAPIClient {
      * @method
      * @since 2.3.6
      * @param {String} username - string to check
-     * @returns {Boolean} whether or not username is valid and unused
+     * @returns {Promise<Boolean>} whether or not username is valid and unused
      */
-    checkUsername: (username: string) => boolean;
+    checkUsername: (username: string) => Promise<boolean>;
     /**
      * Changes the username of the current user
      * @method
@@ -300,17 +300,17 @@ declare class SidechatAPIClient {
      * @method
      * @since 2.6.0
      * @param {String} username - username of the user to fetch
-     * @returns {SidechatProfile}
+     * @returns {Promise<SidechatProfile>}
      */
-    getUserProfile: (username: string) => SidechatProfile;
+    getUserProfile: (username: string) => Promise<SidechatProfile>;
     /**
      * Fetches a public user's posts
      * @method
      * @since 2.6.0
      * @param {String} username - username of the user to fetch
-     * @returns {SidechatPostOrComment[]}
+     * @returns {Promise<SidechatPostOrComment[]>}
      */
-    getUserPosts: (username: string) => SidechatPostOrComment[];
+    getUserPosts: (username: string) => Promise<SidechatPostOrComment[]>;
     /**
      * Marks an activity item as read
      * @method
@@ -338,18 +338,18 @@ declare class SidechatAPIClient {
     /**
      * Gets a list of the user's direct messages
      * @method
-     * @returns {SidechatDirectThread[]}
+     * @returns {Promise<SidechatDirectThread[]>}
      * @since 2.4.4
      */
-    getDMs: () => SidechatDirectThread[];
+    getDMs: () => Promise<SidechatDirectThread[]>;
     /**
      * Gets a single direct message thread
      * @method
      * @param {String} id - alphanumeric ID of the chat to fetch
-     * @returns {SidechatDirectThread}
+     * @returns {Promise<SidechatDirectThread>}
      * @since 2.4.4
      */
-    getDMThread: (id: string) => SidechatDirectThread;
+    getDMThread: (id: string) => Promise<SidechatDirectThread>;
     /**
      * Sends a message to an existing direct message thread - note that you must first use startDM() to start a thread.
      * @method
