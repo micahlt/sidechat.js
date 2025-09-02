@@ -1,4 +1,5 @@
 export default SidechatAPIClient;
+/** @import * as types from "../types/SidechatTypes.js"  */
 /**
  * API client class for making requests to Sidechat's private API.  You'll need to [authenticate]{@tutorial Authentication} before using most of the methods.
  * @class
@@ -7,15 +8,15 @@ export default SidechatAPIClient;
 declare class SidechatAPIClient {
     /**
      * Create a new instance of the API client
-     * @param {SidechatAuthToken} [token] - user bearer token
+     * @param {types.SidechatAuthToken} [token] - user bearer token
      * @param {String} rootUrl - custom API root URL for mocking or using other server
      */
-    constructor(token?: SidechatAuthToken, rootUrl?: string);
+    constructor(token?: types.SidechatAuthToken, rootUrl?: string);
     /**
      * User bearer token
-     * @type {SidechatAuthToken}
+     * @type {types.SidechatAuthToken}
      * */
-    userToken: SidechatAuthToken;
+    userToken: types.SidechatAuthToken;
     /**
      * Default headers for every API request
      * @type {Object}
@@ -32,9 +33,9 @@ declare class SidechatAPIClient {
     /**
      * Manually set the currently signed in user's token.  Generally try to avoid this and instead either pass a token to the constructor or login automatically through the auth functions
      * @method
-     * @param {SidechatAuthToken} token - user bearer token
+     * @param {types.SidechatAuthToken} token - user bearer token
      */
-    setToken: (token: SidechatAuthToken) => void;
+    setToken: (token: types.SidechatAuthToken) => void;
     /**
      * Manually set the root URL for all API requests.  This can be used for mocking requests or redirecting them to a different server
      * @method
@@ -118,81 +119,81 @@ declare class SidechatAPIClient {
      * @since 1.0.0
      * @param {String} groupID - group ID
      * @param {"hot"|"recent"|"top"} category - category to filter posts
-     * @param {SidechatCursorString} [cursor] - cursor string
-     * @returns {SidechatPostsAndCursor} List of posts and cursor
+     * @param {types.SidechatCursorString} [cursor] - cursor string
+     * @returns {Promise<types.SidechatPostsAndCursor>} List of posts and cursor
      */
-    getGroupPosts: (groupID: string, category?: "hot" | "recent" | "top", cursor?: SidechatCursorString) => SidechatPostsAndCursor;
+    getGroupPosts: (groupID: string, category?: "hot" | "recent" | "top", cursor?: types.SidechatCursorString) => Promise<types.SidechatPostsAndCursor>;
     /**
      * Upvote or downvote, or unvote a post
      * @method
      * @since 2.0.0-alpha.0
      * @param {String} postID - post ID to vote on
-     * @param {SidechatVoteString} action - whether to upvote, downvote, or reset vote
+     * @param {types.SidechatVoteString} action - whether to upvote, downvote, or reset vote
      */
-    setVote: (postID: string, action: SidechatVoteString) => Promise<any>;
+    setVote: (postID: string, action: types.SidechatVoteString) => Promise<any>;
     /**
      * Fetches a single post with just its ID
      * @method
      * @since 2.3.0
      * @param {String} postID - ID of post to fetch
      * @param {Boolean} includeDeleted - undocumented
-     * @returns {SidechatPostOrComment} post object
+     * @returns {Promise<types.SidechatPostOrComment>} post object
      */
-    getPost: (postID: string, includeDeleted?: boolean) => SidechatPostOrComment;
+    getPost: (postID: string, includeDeleted?: boolean) => Promise<types.SidechatPostOrComment>;
     /**
      * Fetches the posts or comments that the user has created
      * @method
      * @since 2.3.5
      * @param {"posts"|"comments"} contentType - type of user content to fetch
-     * @returns {SidechatPostOrComment[]} post object
+     * @returns {Promise<types.SidechatPostOrComment[]>} post object
      */
-    getUserContent: (contentType: "posts" | "comments") => SidechatPostOrComment[];
+    getUserContent: (contentType: "posts" | "comments") => Promise<types.SidechatPostOrComment[]>;
     /**
      * Get all the commments on a post
      * @method
      * @since 2.0.0-alpha.0
      * @param {String} postID - post ID to get comments for
-     * @returns {SidechatPostOrComment[]} list of comments
+     * @returns {Promise<types.SidechatPostOrComment[]>} list of comments
      */
-    getPostComments: (postID: string) => SidechatPostOrComment[];
+    getPostComments: (postID: string) => Promise<types.SidechatPostOrComment[]>;
     /**
      * Gets groups to be displayed on the "Explore Groups" page
      * @method
      * @since 2.0.0-alpha.0
      * @param {Boolean} onePage - whether or not results should be returned as a single page
-     * @returns {SidechatGroup[]}
+     * @returns {Promise<types.SidechatGroup[]>}
      */
-    getAvailableGroups: (onePage?: boolean) => SidechatGroup[];
+    getAvailableGroups: (onePage?: boolean) => Promise<types.SidechatGroup[]>;
     /**
      * Searches for new groups based on a query keyword
      * @method
      * @since 2.6.0
      * @param {String} query - the string to search for.  This will be encoded, so strings with spaces and special characters are okay.
-     * @returns {SidechatGroup[]}
+     * @returns {Promise<types.SidechatGroup[]>}
      */
-    searchAvailableGroups: (query: string) => SidechatGroup[];
+    searchAvailableGroups: (query: string) => Promise<types.SidechatGroup[]>;
     /**
      * Retrieves the entire accessible asset library.  Be warned that as of the time of this documentation, it's a 1.5MB JSON download and this request is very expensive.
      * @method
      * @since 2.0.6
-     * @returns {SidechatLibraryAsset[]}
+     * @returns {Promise<types.SidechatLibraryAsset[]>}
      */
-    getAssetLibrary: () => SidechatLibraryAsset[];
+    getAssetLibrary: () => Promise<types.SidechatLibraryAsset[]>;
     /**
      * Gets the current authenticated user and a list of the groups of which they are members.
      * @method
      * @since 2.1.0
-     * @returns {SidechatCurrentUser}
+     * @returns {Promise<types.SidechatCurrentUser>}
      */
-    getCurrentUser: () => SidechatCurrentUser;
+    getCurrentUser: () => Promise<types.SidechatCurrentUser>;
     /**
      * Gets the metadata of a group from its ID
      * @method
      * @since 2.1.0
      * @param {String} [groupID] - alphanumeric ID of a group to get.  Falls back to user's primary group.
-     * @returns {SidechatGroup}
+     * @returns {Promise<types.SidechatGroup>}
      */
-    getGroupMetadata: (groupID?: string) => SidechatGroup;
+    getGroupMetadata: (groupID?: string) => Promise<types.SidechatGroup>;
     /**
      * Joins or leaves a group
      * @method
@@ -210,25 +211,25 @@ declare class SidechatAPIClient {
      * @param {String} groupID - alphanumeric ID of group in which the parent post resides
      * @param {String} [replyCommentID] - alphanumeric ID of comment to reply to.  Falls back to parentPostID
      * @param {String} [topLevelReplyID] - alphanumeric ID of the top-level comment to reply to.  Used only when replying to replies.  Falls back to parentPostID
-     * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach
+     * @param {types.SidechatSimpleAsset[]} [assetList] - list of assets to attach
      * @param {Boolean} [disableDMs] - prevent direct messages being sent to comment's author
      * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on comment
-     * @returns {SidechatPostOrComment} created comment
+     * @returns {Promise<types.SidechatPostOrComment>} created comment
      */
-    createComment: (parentPostID: string, text: string, groupID: string, replyCommentID?: string, topLevelReplyID?: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, anonymous?: boolean) => SidechatPostOrComment;
+    createComment: (parentPostID: string, text: string, groupID: string, replyCommentID?: string, topLevelReplyID?: string, assetList?: types.SidechatSimpleAsset[], disableDMs?: boolean, anonymous?: boolean) => Promise<types.SidechatPostOrComment>;
     /**
      * Creates a new post in the specified group
      * @method
      * @since 2.2.0
      * @param {String} text - text content of comment
      * @param {String} groupID - alphanumeric ID of group in which the parent post resides
-     * @param {SidechatSimpleAsset[]} [assetList] - list of assets to attach.
+     * @param {types.SidechatSimpleAsset[]} [assetList] - list of assets to attach.
      * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
      * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
      * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
-     * @returns {SidechatPostOrComment} the created post
+     * @returns {Promise<types.SidechatPostOrComment>} the created post
      */
-    createPost: (text: string, groupID: string, assetList?: SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: any) => SidechatPostOrComment;
+    createPost: (text: string, groupID: string, assetList?: types.SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: any) => Promise<types.SidechatPostOrComment>;
     /**
      * Deletes a post or comment that the user created
      * @method
@@ -257,10 +258,10 @@ declare class SidechatAPIClient {
      * @param {String} uri - URI of the asset to upload
      * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
      * @param {String} [name] - filename of the asset
-     * @returns {String} URL of the uploaded asset
+     * @returns {Promise<String>} URL of the uploaded asset
      * @since 2.5.1
      */
-    uploadAsset: (uri: string, mimeType: string, name?: string) => string;
+    uploadAsset: (uri: string, mimeType: string, name?: string) => Promise<string>;
     /**
      * Sets the conversation icon of a user
      * @method
@@ -284,9 +285,9 @@ declare class SidechatAPIClient {
      * @method
      * @since 2.3.6
      * @param {String} username - string to check
-     * @returns {Boolean} whether or not username is valid and unused
+     * @returns {Promise<Boolean>} whether or not username is valid and unused
      */
-    checkUsername: (username: string) => boolean;
+    checkUsername: (username: string) => Promise<boolean>;
     /**
      * Changes the username of the current user
      * @method
@@ -300,17 +301,17 @@ declare class SidechatAPIClient {
      * @method
      * @since 2.6.0
      * @param {String} username - username of the user to fetch
-     * @returns {SidechatProfile}
+     * @returns {Promise<types.SidechatProfile>}
      */
-    getUserProfile: (username: string) => SidechatProfile;
+    getUserProfile: (username: string) => Promise<types.SidechatProfile>;
     /**
      * Fetches a public user's posts
      * @method
      * @since 2.6.0
      * @param {String} username - username of the user to fetch
-     * @returns {SidechatPostOrComment[]}
+     * @returns {Promise<types.SidechatPostOrComment[]>}
      */
-    getUserPosts: (username: string) => SidechatPostOrComment[];
+    getUserPosts: (username: string) => Promise<types.SidechatPostOrComment[]>;
     /**
      * Marks an activity item as read
      * @method
@@ -338,29 +339,29 @@ declare class SidechatAPIClient {
     /**
      * Gets a list of the user's direct messages
      * @method
-     * @returns {SidechatDirectThread[]}
+     * @returns {Promise<types.SidechatDirectThread[]>}
      * @since 2.4.4
      */
-    getDMs: () => SidechatDirectThread[];
+    getDMs: () => Promise<types.SidechatDirectThread[]>;
     /**
      * Gets a single direct message thread
      * @method
      * @param {String} id - alphanumeric ID of the chat to fetch
-     * @returns {SidechatDirectThread}
+     * @returns {Promise<types.SidechatDirectThread>}
      * @since 2.4.4
      */
-    getDMThread: (id: string) => SidechatDirectThread;
+    getDMThread: (id: string) => Promise<types.SidechatDirectThread>;
     /**
      * Sends a message to an existing direct message thread - note that you must first use startDM() to start a thread.
      * @method
      * @param {String} chatID - alphanumeric ID of the chat to send to
      * @param {String} text - text content of message
      * @param {String} clientID - alphanumeric device ID
-     * @param {SidechatAsset[]} assets - array of assets to send
+     * @param {types.SidechatAsset[]} assets - array of assets to send
      * @param {Boolean} anonymous - whether the DM should be sent anonymously
      * @since 2.4.4
      */
-    sendDM: (chatID: string, text: string, clientID: string, assets?: SidechatAsset[], anonymous?: boolean) => Promise<any>;
+    sendDM: (chatID: string, text: string, clientID: string, assets?: types.SidechatAsset[], anonymous?: boolean) => Promise<any>;
     /**
      * Creates a new direct message thread
      * @method
@@ -386,4 +387,5 @@ declare class SidechatAPIClient {
      */
     unhidePostsFromAllUsers: () => Promise<any>;
 }
+import type * as types from "../types/SidechatTypes.js";
 //# sourceMappingURL=SidechatAPIClient.d.ts.map
