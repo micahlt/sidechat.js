@@ -962,6 +962,7 @@ class SidechatAPIClient {
    * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
    * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
    * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
+   * @param {Array<String>} [pollOptions] - List of poll options.  If provided, a poll will be created with these options.
    * @returns {Promise<types.SidechatPostOrComment>} the created post
    */
   createPost = async (
@@ -971,29 +972,39 @@ class SidechatAPIClient {
     disableDMs = false,
     disableComments = false,
     anonymous = false,
-    repostId = undefined
+    repostId = undefined,
+    pollOptions = undefined
   ) => {
     if (!this.userToken) {
       throw new SidechatAPIError("User is not authenticated.");
     }
     try {
+      // Build the request body
+      const body = {
+        type: "post",
+        assets: assetList,
+        group_ids: [groupID],
+        text: text,
+        attachments: [],
+        dms_disabled: disableDMs,
+        comments_disabled: disableComments,
+        using_identity: !anonymous,
+        quote_post_id: repostId
+      };
+      // If pollOptions is provided and is a non-empty array, add poll_request
+      if (Array.isArray(pollOptions) && pollOptions.length > 0) {
+        body.poll_request = {
+          allows_view_results: true,
+          choices: pollOptions
+        };
+      }
       const res = await fetch(`${this.apiRoot}/v1/posts`, {
         method: "POST",
         headers: {
           ...this.defaultHeaders,
           Authorization: `Bearer ${this.userToken}`,
         },
-        body: JSON.stringify({
-          type: "post",
-          assets: assetList,
-          group_ids: [groupID],
-          text: text,
-          attachments: [],
-          dms_disabled: disableDMs,
-          comments_disabled: disableComments,
-          using_identity: !anonymous,
-          quote_post_id: repostId
-        }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       return await json.posts[0];
