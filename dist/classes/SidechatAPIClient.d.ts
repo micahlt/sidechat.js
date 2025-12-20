@@ -227,9 +227,10 @@ declare class SidechatAPIClient {
      * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
      * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
      * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
+     * @param {Array<String>} [pollOptions] - List of poll options.  If provided, a poll will be created with these options.
      * @returns {Promise<types.SidechatPostOrComment>} the created post
      */
-    createPost: (text: string, groupID: string, assetList?: types.SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: any) => Promise<types.SidechatPostOrComment>;
+    createPost: (text: string, groupID: string, assetList?: types.SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: any, pollOptions?: Array<string>) => Promise<types.SidechatPostOrComment>;
     /**
      * Deletes a post or comment that the user created
      * @method
