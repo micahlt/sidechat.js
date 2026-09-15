@@ -428,7 +428,7 @@ class SidechatAPIClient {
       contentType = "my_comments";
     }
     try {
-      const res = await fetch(`${this.apiRoot}/v1/posts&type=${contentType}`, {
+      const res = await fetch(`${this.apiRoot}/v1/posts?type=${contentType}`, {
         method: "GET",
         headers: {
           ...this.defaultHeaders,
@@ -877,7 +877,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `${this.apiRoot}/v1/polls/view_results&cacheBust=${Date.now()}`,
+        `${this.apiRoot}/v1/polls/view_results?cacheBust=${Date.now()}`,
         {
           method: "POST",
           headers: {
@@ -1180,7 +1180,7 @@ class SidechatAPIClient {
     }
     try {
       const res = await fetch(
-        `${this.apiRoot}/v1/chats/explore&cacheBust=${Date.now()}`,
+        `${this.apiRoot}/v1/chats/explore?cacheBust=${Date.now()}`,
         {
           method: "GET",
           headers: {

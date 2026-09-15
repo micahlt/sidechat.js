@@ -28,7 +28,8 @@
     "dev": "rollup -c --watch",
     "docs": "jsdoc --configure jsdoc.json --verbose",
     "prepublish": "tsc",
-    "typegen": "tsc"
+    "typegen": "tsc",
+    "test": "node --test \"src/tests/unit/**/*.test.js\""
   },
   "repository": {
     "type": "git",
