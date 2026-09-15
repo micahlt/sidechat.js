@@ -109,7 +109,7 @@
  * @prop {String} id - alphanumeric ID of user
  * @prop {String} name - public-facing username
  * @prop {SidechatIcon} conversation_icon - icon associated with user
- * @prop {Boolean} description - the user bio
+ * @prop {String} description - the user bio
  * @prop {String} index_name - undocumented
  * @prop {String} analytics_name - undocumented
  * @prop {String} color - undocumented
@@ -207,9 +207,30 @@ var SidechatTypes = {};
  * @extends Error
  */
 class SidechatAPIError extends Error {
-  constructor(message) {
-    super(message);
+  /**
+   * HTTP status code of the failed response, if the error came from a non-2xx response
+   * @type {Number|undefined}
+   */
+  status;
+
+  /**
+   * Parsed JSON body of the failed response, if any
+   * @type {any}
+   */
+  response;
+
+  /**
+   * @param {String} message - human-readable description of the error
+   * @param {Object} [details]
+   * @param {Number} [details.status] - HTTP status code of the failed response
+   * @param {any} [details.response] - parsed JSON body of the failed response
+   * @param {Error} [details.cause] - underlying error, if this wraps one
+   */
+  constructor(message, details = {}) {
+    super(message, details.cause ? { cause: details.cause } : undefined);
     this.name = "SidechatAPIError";
+    this.status = details.status;
+    this.response = details.response;
   }
 }
 
@@ -230,14 +251,12 @@ class SidechatAPIClient {
   /**
    * Default headers for every API request
    * @type {Object}
-   * @static
-   * @constant
    */
   defaultHeaders = {
     Accept: "application/json",
     "Content-Type": "application/json",
     "App-Version": "6.0.0",
-    Dnt: 1,
+    Dnt: "1",
   };
 
   /**
@@ -281,13 +300,90 @@ class SidechatAPIClient {
   };
 
   /**
-   * Run an arbitrary API request using the current client's authentication
+   * Build a full request URL from an endpoint path and optional query parameters.
+   * Parameters whose value is undefined or null are omitted; everything else is URL-encoded.
+   * @param {String} endpoint - path relative to apiRoot (e.g. "/v1/posts")
+   * @param {Object} [query] - query parameters to append
+   * @returns {String}
+   * @private
+   */
+  #buildUrl(endpoint, query) {
+    const params = new URLSearchParams();
+    if (query) {
+      for (const [key, value] of Object.entries(query)) {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
+        }
+      }
+    }
+    const qs = params.toString();
+    return `${this.apiRoot}${endpoint}${qs ? `?${qs}` : ""}`;
+  }
+
+  /**
+   * Perform a request against the API and return the parsed JSON body.
+   * Throws a SidechatAPIError carrying the server's message (and the HTTP status) on a non-2xx response,
+   * and a SidechatAPIError wrapping the underlying error if the request itself fails.
+   * @param {String} endpoint - path relative to apiRoot (e.g. "/v1/posts")
+   * @param {Object} [options]
+   * @param {"GET"|"POST"|"PUT"|"DELETE"|"PATCH"|"OPTIONS"} [options.method] - HTTP method
+   * @param {Object} [options.query] - query parameters
+   * @param {Object} [options.body] - JSON body
+   * @param {Object} [options.headers] - extra headers merged over the defaults
+   * @param {Boolean} [options.auth] - whether the request requires (and sends) the user token
+   * @param {String} [options.failure] - message to use when no server message is available
+   * @returns {Promise<any>}
+   * @private
+   */
+  async #request(
+    endpoint,
+    { method = "GET", query, body, headers = {}, auth = true, failure = "Request failed." } = {},
+  ) {
+    if (auth && !this.userToken) {
+      throw new SidechatAPIError("User is not authenticated.");
+    }
+    const url = this.#buildUrl(endpoint, query);
+    const requestHeaders = {
+      ...this.defaultHeaders,
+      ...(auth ? { Authorization: `Bearer ${this.userToken}` } : {}),
+      ...headers,
+    };
+    let res;
+    try {
+      res = await fetch(url, {
+        method,
+        headers: requestHeaders,
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+    } catch (err) {
+      throw new SidechatAPIError(`${failure} (${err.message})`, { cause: err });
+    }
+    let json = null;
+    try {
+      json = await res.json();
+    } catch {
+      // Empty or non-JSON body (e.g. a 204).  Leave json as null.
+    }
+    if (!res.ok) {
+      const serverMessage =
+        (json && (json.message || json.error)) || `${failure} (HTTP ${res.status})`;
+      throw new SidechatAPIError(serverMessage, {
+        status: res.status,
+        response: json,
+      });
+    }
+    return json ?? {};
+  }
+
+  /**
+   * Run an arbitrary API request using the current client's authentication.  Returns the raw Response so you can inspect status and body yourself.
    * @method
    * @param {String} endpoint - API endpoint to request (e.g. "/v1/posts")
    * @param {"GET"|"POST"|"PUT"|"DELETE"|"PATCH"|"OPTIONS"} [method] - HTTP method to use
-   * @param {Object} [body] - body to send with the request
+   * @param {Object|String} [body] - body to send with the request.  Objects are JSON-encoded; strings are sent as-is.
    * @param {Object} [headers] - custom headers to send with the request
-   * @param {Boolean} [stripHeaders] - remove the default headers from the request
+   * @param {Boolean} [stripHeaders] - remove the default headers from the request (custom headers are still sent)
+   * @returns {Promise<Response>}
    * @since 2.4.9
    */
   sendRequest = (
@@ -297,14 +393,15 @@ class SidechatAPIClient {
     headers = {},
     stripHeaders = false,
   ) => {
-    let requestHeaders = this.defaultHeaders;
-    if (stripHeaders) {
-      headers = {};
-    }
-    requestHeaders = { ...requestHeaders, ...headers };
+    const requestHeaders = {
+      ...(stripHeaders ? {} : this.defaultHeaders),
+      ...headers,
+    };
+    const encodedBody =
+      body !== undefined && typeof body !== "string" ? JSON.stringify(body) : body;
     return fetch(`${this.apiRoot}${endpoint}`, {
       headers: { Authorization: `Bearer ${this.userToken}`, ...requestHeaders },
-      body: body,
+      body: encodedBody,
       method: method,
     });
   };
@@ -316,21 +413,15 @@ class SidechatAPIClient {
    * @param {Number} phoneNumber - US phone number (WITHOUT +1) to send verification code to
    */
   loginViaSMS = async (phoneNumber) => {
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/login_register`, {
-        method: "POST",
-        headers: this.defaultHeaders,
-        body: JSON.stringify({
-          phone_number: `+1${phoneNumber}`,
-          version: 3,
-        }),
-      });
-      const json = await res.json();
-      return json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError("Failed to request SMS verification.");
-    }
+    return this.#request("/v1/login_register", {
+      method: "POST",
+      auth: false,
+      body: {
+        phone_number: `+1${phoneNumber}`,
+        version: 3,
+      },
+      failure: "Failed to request SMS verification.",
+    });
   };
 
   /**
@@ -341,24 +432,19 @@ class SidechatAPIClient {
    * @param {String} code  - the verification code
    */
   verifySMSCode = async (phoneNumber, code) => {
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/verify_phone_number`, {
-        method: "POST",
-        headers: this.defaultHeaders,
-        body: JSON.stringify({
-          phone_number: `+1${phoneNumber}`,
-          code: code.toUpperCase(),
-        }),
-      });
-      const json = await res.json();
-      if (json?.logged_in_user?.token) {
-        this.userToken = json.logged_in_user.token;
-      }
-      return json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError("Failed verify this code.");
+    const json = await this.#request("/v1/verify_phone_number", {
+      method: "POST",
+      auth: false,
+      body: {
+        phone_number: `+1${phoneNumber}`,
+        code: String(code).toUpperCase(),
+      },
+      failure: "Failed to verify this code.",
+    });
+    if (json?.logged_in_user?.token) {
+      this.userToken = json.logged_in_user.token;
     }
+    return json;
   };
 
   /**
@@ -370,26 +456,21 @@ class SidechatAPIClient {
    */
   setAge = async (age, registrationID) => {
     if (age < 13) {
-      throw new SidechatAPIError("You're too young to use Offsides.");
+      throw new SidechatAPIError("You're too young to use Sidechat.");
     }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/complete_registration`, {
-        method: "POST",
-        headers: this.defaultHeaders,
-        body: JSON.stringify({
-          age: Number(age),
-          registration_id: registrationID,
-        }),
-      });
-      const json = await res.json();
-      if (json.token) {
-        this.userToken = json.token;
-      }
-      return json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError("Failed verify this code.");
+    const json = await this.#request("/v1/complete_registration", {
+      method: "POST",
+      auth: false,
+      body: {
+        age: Number(age),
+        registration_id: registrationID,
+      },
+      failure: "Failed to complete registration.",
+    });
+    if (json.token) {
+      this.userToken = json.token;
     }
+    return json;
   };
 
   /**
@@ -400,29 +481,15 @@ class SidechatAPIClient {
    * @tutorial Email Registration
    */
   registerEmail = async (email) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
+    const json = await this.#request("/v2/users/register_email", {
+      method: "POST",
+      body: { email: email },
+      failure: "Failed to request email verification.",
+    });
+    if (json.message) {
+      throw new SidechatAPIError(json.message, { response: json });
     }
-    try {
-      const res = await fetch(`${this.apiRoot}/v2/users/register_email`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          email: email,
-        }),
-      });
-      const json = await res.json();
-      if (json.message) {
-        throw new SidechatAPIError(json.message);
-      }
-      return json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError("Failed to request email verification.");
-    }
+    return json;
   };
 
   /**
@@ -431,28 +498,17 @@ class SidechatAPIClient {
    * @since 1.0.0
    */
   checkEmailVerification = async () => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/users/check_email_verified`, {
-        method: "GET",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
+    const json = await this.#request("/v1/users/check_email_verified", {
+      failure: "Failed to check email verification.",
+    });
+    if (json.verified_email_updates_response) {
+      return json.verified_email_updates_response;
+    } else if (json.changing_phone_number_verified_email_user) {
+      return json.changing_phone_number_verified_email_user;
+    } else {
+      throw new SidechatAPIError(json?.message || "Email is not verified.", {
+        response: json,
       });
-      const json = await res.json();
-      if (json.verified_email_updates_response) {
-        return json.verified_email_updates_response;
-      } else if (json.changing_phone_number_verified_email_user) {
-        return json.changing_phone_number_verified_email_user;
-      } else {
-        throw new SidechatAPIError(json?.message || "Email is not verified.");
-      }
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError("Email is not verified.");
     }
   };
 
@@ -460,31 +516,18 @@ class SidechatAPIClient {
    * Set the device ID of the current user
    * @method
    * @since 1.0.0
-   * @param {String} deviceId - the device ID to set
+   * @param {String} deviceID - the device ID to set
    */
   setDeviceID = async (deviceID) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/register_device_token`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          build_type: "release",
-          bundle_id: "com.flowerave.sidechat",
-          device_token: deviceID,
-        }),
-      });
-      const json = await res.json();
-      return json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError("Failed verify this code.");
-    }
+    return this.#request("/v1/register_device_token", {
+      method: "POST",
+      body: {
+        build_type: "release",
+        bundle_id: "com.flowerave.sidechat",
+        device_token: deviceID,
+      },
+      failure: "Failed to register device.",
+    });
   };
 
   /**
@@ -506,26 +549,10 @@ class SidechatAPIClient {
    * @param {String} [groupID] - ID of a specific group to retrieve info from.  Falls back to user's primary group.
    */
   getUpdates = async (groupID = "") => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/updates?group_id=${groupID}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      return json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get posts from group.`);
-    }
+    return this.#request("/v1/updates", {
+      query: { group_id: groupID },
+      failure: "Failed to get updates.",
+    });
   };
 
   /**
@@ -538,28 +565,15 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatPostsAndCursor>} List of posts and cursor
    */
   getGroupPosts = async (groupID, category = "hot", cursor) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/posts?${
-          cursor ? "cursor=" + encodeURIComponent(cursor) + "&" : ""
-        }group_id=${groupID}&type=${category}&cacheBust=${Date.now()}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      return json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get posts from group.`);
-    }
+    return this.#request("/v1/posts", {
+      query: {
+        cursor: cursor || undefined,
+        group_id: groupID,
+        type: category,
+        cacheBust: Date.now(),
+      },
+      failure: "Failed to get posts from group.",
+    });
   };
 
   /**
@@ -570,27 +584,14 @@ class SidechatAPIClient {
    * @param {types.SidechatVoteString} action - whether to upvote, downvote, or reset vote
    */
   setVote = async (postID, action) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/posts/set_vote`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          post_id: postID,
-          vote_status: action,
-        }),
-      });
-      const json = await res.json();
-      return json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to change the vote on post.`);
-    }
+    return this.#request("/v1/posts/set_vote", {
+      method: "POST",
+      body: {
+        post_id: postID,
+        vote_status: action,
+      },
+      failure: "Failed to change the vote on post.",
+    });
   };
 
   /**
@@ -602,26 +603,15 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatPostOrComment>} post object
    */
   getPost = async (postID, includeDeleted = false) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/posts/get?include_deleted=${includeDeleted}&post_id=${postID}&cacheBust=${Date.now()}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      return json.post;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get post from ID.`);
-    }
+    const json = await this.#request("/v1/posts/get", {
+      query: {
+        include_deleted: includeDeleted,
+        post_id: postID,
+        cacheBust: Date.now(),
+      },
+      failure: "Failed to get post from ID.",
+    });
+    return json.post;
   };
 
   /**
@@ -632,104 +622,60 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatPostOrComment[]>} post object
    */
   getUserContent = async (contentType) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
     if (contentType == "posts") {
       contentType = "my_posts";
     } else if (contentType == "comments") {
       contentType = "my_comments";
     }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/posts&type=${contentType}`, {
-        method: "GET",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-      });
-      const json = await res.json();
-      return json.posts;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get content from user.`);
-    }
+    const json = await this.#request("/v1/posts", {
+      query: { type: contentType },
+      failure: "Failed to get content from user.",
+    });
+    return json.posts;
   };
 
   /**
-   * Get all the commments on a post
+   * Get all the commments on a post.  Replies are placed directly after the comment they reply to, regardless of the order the API returns them in.
    * @method
    * @since 2.0.0-alpha.0
    * @param {String} postID - post ID to get comments for
    * @returns {Promise<types.SidechatPostOrComment[]>} list of comments
    */
   getPostComments = async (postID) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
+    const json = await this.#request("/v1/posts/comments/", {
+      query: { post_id: postID, cacheBust: Date.now() },
+      failure: "Failed to get comments on post.",
+    });
+    const apiComments = json.posts || [];
+
+    // First pass: index every comment by ID so replies can find their parent
+    // no matter which order the API returned them in.
+    const commentMap = new Map();
+    for (const comment of apiComments) {
+      commentMap.set(comment.id, comment);
     }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/posts/comments/?post_id=${postID}&cacheBust=${Date.now()}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      // Function to preprocess the comments and organize them into a nested structure
-      function preprocessComments(apiComments) {
-        // Map to store comments by their IDs for efficient lookup
-        const commentMap = new Map();
-        // List to store top-level comments
-        const topLevelComments = [];
 
-        // Iterate through the API comments
-        apiComments.forEach((comment) => {
-          // Store the comment in the map with its ID as the key
-          commentMap.set(comment.id, comment);
-          // Get the parent comment using the reply_post_id
-          const parentComment = commentMap.get(comment.reply_post_id);
-          // Check if the comment is a top-level comment
-          if (
-            !parentComment ||
-            comment.reply_post_id === comment.parent_post_id
-          ) {
-            // If it's a top-level comment, push it to the topLevelComments array
-            topLevelComments.push(comment);
-          } else {
-            // If it's a reply, add it to the parent comment's replies array
-            if (!parentComment.replies) parentComment.replies = [];
-            parentComment.replies.push(comment);
-          }
-        });
-
-        // Flatten the nested structure and return a single list of comments
-        return flattenComments(topLevelComments);
+    // Second pass: attach replies to their parent, or treat as top-level.
+    const topLevelComments = [];
+    for (const comment of apiComments) {
+      const parentComment = commentMap.get(comment.reply_post_id);
+      if (!parentComment || comment.reply_post_id === comment.parent_post_id) {
+        topLevelComments.push(comment);
+      } else {
+        if (!parentComment.replies) parentComment.replies = [];
+        parentComment.replies.push(comment);
       }
-
-      // Function to flatten nested comments into a single list
-      function flattenComments(comments) {
-        // Use reduce to flatten the nested comments array into a single list
-        return comments.reduce((flatComments, comment) => {
-          // Push the current comment to the flatComments array
-          flatComments.push(comment);
-          // If the current comment has replies, recursively flatten them and push to the flatComments array
-          if (comment.replies)
-            flatComments.push(...flattenComments(comment.replies));
-          // Return the flatComments array
-          return flatComments;
-        }, []);
-      }
-
-      const sortedComments = preprocessComments(json.posts);
-      return sortedComments;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get comments on post.`);
     }
+
+    // Flatten the tree back into a single list, depth-first.
+    const flattenComments = (comments) =>
+      comments.reduce((flat, comment) => {
+        flat.push(comment);
+        if (comment.replies) flat.push(...flattenComments(comment.replies));
+        return flat;
+      }, []);
+
+    return flattenComments(topLevelComments);
   };
 
   /**
@@ -740,24 +686,11 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatGroup[]>}
    */
   getAvailableGroups = async (onePage = true) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/groups/explore`, {
-        method: "GET",
-        headers: {
-          ...this.defaultHeaders,
-          "App-Version": onePage ? "0" : this.defaultHeaders["App-Version"],
-          Authorization: `Bearer ${this.userToken}`,
-        },
-      });
-      const json = await res.json();
-      return await json.groups;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get groups from explore.`);
-    }
+    const json = await this.#request("/v1/groups/explore", {
+      headers: onePage ? { "App-Version": "0" } : {},
+      failure: "Failed to get groups from explore.",
+    });
+    return json.groups;
   };
 
   /**
@@ -768,26 +701,11 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatGroup[]>}
    */
   searchAvailableGroups = async (query) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/groups/explore/search?term=${encodeURIComponent(query)}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      return await json.results;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to search groups.`);
-    }
+    const json = await this.#request("/v1/groups/explore/search", {
+      query: { term: query },
+      failure: "Failed to search groups.",
+    });
+    return json.results;
   };
 
   /**
@@ -797,23 +715,10 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatLibraryAsset[]>}
    */
   getAssetLibrary = async () => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/assets/library`, {
-        method: "GET",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-      });
-      const json = await res.json();
-      return await json.items;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get asset library.`);
-    }
+    const json = await this.#request("/v1/assets/library", {
+      failure: "Failed to get asset library.",
+    });
+    return json.items;
   };
 
   /**
@@ -823,23 +728,9 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatCurrentUser>}
    */
   getCurrentUser = async () => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/users/me`, {
-        method: "GET",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get asset library.`);
-    }
+    return this.#request("/v1/users/me", {
+      failure: "Failed to get current user.",
+    });
   };
 
   /**
@@ -850,23 +741,10 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatGroup>}
    */
   getGroupMetadata = async (groupID = "") => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/groups/${groupID}`, {
-        method: "GET",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-      });
-      const json = await res.json();
-      return await json.group;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get group metadata.`);
-    }
+    const json = await this.#request(`/v1/groups/${encodeURIComponent(groupID)}`, {
+      failure: "Failed to get group metadata.",
+    });
+    return json.group;
   };
 
   /**
@@ -877,29 +755,11 @@ class SidechatAPIClient {
    * @since 2.3.8
    */
   setGroupMembership = async (groupID, isMember) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/groups/${isMember ? "join" : "leave"}`,
-        {
-          method: "POST",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-          body: JSON.stringify({
-            group_id: groupID,
-          }),
-        },
-      );
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to modify group membership.`);
-    }
+    return this.#request(`/v1/groups/${isMember ? "join" : "leave"}`, {
+      method: "POST",
+      body: { group_id: groupID },
+      failure: "Failed to modify group membership.",
+    });
   };
 
   /**
@@ -926,34 +786,22 @@ class SidechatAPIClient {
     disableDMs = false,
     anonymous = false,
   ) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/posts`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          type: "comment",
-          assets: assetList,
-          group_ids: [groupID],
-          text: text,
-          reply_post_id: topLevelReplyID || replyCommentID || parentPostID,
-          reply_comment_post_id: replyCommentID || parentPostID,
-          parent_post_id: parentPostID,
-          dms_disabled: disableDMs,
-          using_identity: !anonymous,
-        }),
-      });
-      const json = await res.json();
-      return await json.comment;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to post comment.`);
-    }
+    const json = await this.#request("/v1/posts", {
+      method: "POST",
+      body: {
+        type: "comment",
+        assets: assetList,
+        group_ids: [groupID],
+        text: text,
+        reply_post_id: topLevelReplyID || replyCommentID || parentPostID,
+        reply_comment_post_id: replyCommentID || parentPostID,
+        parent_post_id: parentPostID,
+        dms_disabled: disableDMs,
+        using_identity: !anonymous,
+      },
+      failure: "Failed to post comment.",
+    });
+    return json.comment;
   };
 
   /**
@@ -966,6 +814,7 @@ class SidechatAPIClient {
    * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
    * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
    * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
+   * @param {String} [repostId] - alphanumeric ID of a post to quote/repost.  Omit for a normal post.
    * @param {Array<String>} [pollOptions] - List of poll options.  If provided, a poll will be created with these options.
    * @returns {Promise<types.SidechatPostOrComment>} the created post
    */
@@ -979,43 +828,29 @@ class SidechatAPIClient {
     repostId = undefined,
     pollOptions = undefined,
   ) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      // Build the request body
-      const body = {
-        type: "post",
-        assets: assetList,
-        group_ids: [groupID],
-        text: text,
-        attachments: [],
-        dms_disabled: disableDMs,
-        comments_disabled: disableComments,
-        using_identity: !anonymous,
-        quote_post_id: repostId,
+    const body = {
+      type: "post",
+      assets: assetList,
+      group_ids: [groupID],
+      text: text,
+      attachments: [],
+      dms_disabled: disableDMs,
+      comments_disabled: disableComments,
+      using_identity: !anonymous,
+      quote_post_id: repostId,
+    };
+    if (Array.isArray(pollOptions) && pollOptions.length > 0) {
+      body.poll_request = {
+        allows_view_results: true,
+        choices: pollOptions,
       };
-      // If pollOptions is provided and is a non-empty array, add poll_request
-      if (Array.isArray(pollOptions) && pollOptions.length > 0) {
-        body.poll_request = {
-          allows_view_results: true,
-          choices: pollOptions,
-        };
-      }
-      const res = await fetch(`${this.apiRoot}/v1/posts`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify(body),
-      });
-      const json = await res.json();
-      return await json.posts[0];
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to make post.`);
     }
+    const json = await this.#request("/v1/posts", {
+      method: "POST",
+      body,
+      failure: "Failed to make post.",
+    });
+    return json.posts?.[0];
   };
 
   /**
@@ -1025,26 +860,11 @@ class SidechatAPIClient {
    * @param {String} postOrCommentID - alphanumeric ID of post to delete
    */
   deletePostOrComment = async (postOrCommentID) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/posts/delete`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          post_id: postOrCommentID,
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to delete post.`);
-    }
+    return this.#request("/v1/posts/delete", {
+      method: "POST",
+      body: { post_id: postOrCommentID },
+      failure: "Failed to delete post.",
+    });
   };
 
   /**
@@ -1055,27 +875,14 @@ class SidechatAPIClient {
    * @since 2.5.4
    */
   voteOnPoll = async (pollId, choiceIndex) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/polls/vote`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          poll_id: pollId,
-          choice: choiceIndex,
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to vote on poll`);
-    }
+    return this.#request("/v1/polls/vote", {
+      method: "POST",
+      body: {
+        poll_id: pollId,
+        choice: choiceIndex,
+      },
+      failure: "Failed to vote on poll.",
+    });
   };
 
   /**
@@ -1085,33 +892,17 @@ class SidechatAPIClient {
    * @since 2.5.4
    */
   viewPollResults = async (pollId) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/polls/view_results&cacheBust=${Date.now()}`,
-        {
-          method: "POST",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-          body: JSON.stringify({
-            poll_id: pollId,
-          }),
-        },
-      );
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to mark poll results as viewed.`);
-    }
+    return this.#request("/v1/polls/view_results", {
+      method: "POST",
+      query: { cacheBust: Date.now() },
+      body: { poll_id: pollId },
+      failure: "Failed to mark poll results as viewed.",
+    });
   };
 
   /**
-   * Uploads an asset to AWS S3 for use in posts and comments.  Currently photos only
+   * Uploads an asset to AWS S3 for use in posts and comments.  Currently photos only.
+   * Note: the `{ uri, name, type }` FormData shape used here is what React Native's FormData expects; in Node you will need to supply a Blob yourself.
    * @method
    * @param {String} uri - URI of the asset to upload
    * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
@@ -1136,29 +927,34 @@ class SidechatAPIClient {
       uri: uri,
     });
 
-    const urlReq = await this.sendRequest(
-      `/v1/assets/upload_url?content_type=${imageType}`,
-    );
-    const urlJson = await urlReq.json();
+    const urlJson = await this.#request("/v1/assets/upload_url", {
+      query: { content_type: imageType },
+      failure: "Failed to get upload URL.",
+    });
+    if (!urlJson.upload_url || !urlJson.asset_id) {
+      throw new SidechatAPIError("Upload URL response was missing upload_url or asset_id.", {
+        response: urlJson,
+      });
+    }
 
+    let uploadReq;
     try {
-      const uploadReq = await fetch(urlJson.upload_url, {
+      uploadReq = await fetch(urlJson.upload_url, {
         body: data.getAll("image")[0],
         method: "PUT",
         headers: {
           "Content-Type": mimeType,
         },
       });
-      if (uploadReq.status == 200) {
-        return `${this.apiRoot}/v1/assets/library/${urlJson.asset_id}`;
-      } else {
-        throw new SidechatAPIError(
-          `Couldn't upload image - error ${uploadReq.status}`,
-        );
-      }
     } catch (e) {
-      throw new SidechatAPIError(e.message);
+      throw new SidechatAPIError(`Couldn't upload image (${e.message})`, { cause: e });
     }
+    if (uploadReq.status == 200) {
+      return `${this.apiRoot}/v1/assets/library/${urlJson.asset_id}`;
+    }
+    throw new SidechatAPIError(`Couldn't upload image - error ${uploadReq.status}`, {
+      status: uploadReq.status,
+    });
   };
 
   /**
@@ -1171,32 +967,19 @@ class SidechatAPIClient {
    * @param {String} secondaryColor - hex string (including #) of secondary color
    */
   setUserIcon = async (userID, emoji, primaryColor, secondaryColor) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/users/${userID}`, {
-        method: "PATCH",
-        headers: {
-          ...this.defaultHeaders,
-          "App-Version": "0",
-          Authorization: `Bearer ${this.userToken}`,
+    return this.#request(`/v1/users/${encodeURIComponent(userID)}`, {
+      method: "PATCH",
+      headers: { "App-Version": "0" },
+      body: {
+        conversation_icon: {
+          emoji: emoji,
+          secondary_color: secondaryColor,
+          is_migrated: true,
+          color: primaryColor,
         },
-        body: JSON.stringify({
-          conversation_icon: {
-            emoji: emoji,
-            secondary_color: secondaryColor,
-            is_migrated: true,
-            color: primaryColor,
-          },
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to set icon.`);
-    }
+      },
+      failure: "Failed to set icon.",
+    });
   };
 
   /**
@@ -1207,27 +990,12 @@ class SidechatAPIClient {
    * @param {String} bio - text to set as bio
    */
   setUserBio = async (userID, bio) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/users/${userID}`, {
-        method: "PATCH",
-        headers: {
-          ...this.defaultHeaders,
-          "App-Version": "5.4.22",
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          bio: bio,
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to set bio.`);
-    }
+    return this.#request(`/v1/users/${encodeURIComponent(userID)}`, {
+      method: "PATCH",
+      headers: { "App-Version": "5.4.22" },
+      body: { bio: bio },
+      failure: "Failed to set bio.",
+    });
   };
 
   /**
@@ -1238,28 +1006,19 @@ class SidechatAPIClient {
    * @returns {Promise<Boolean>} whether or not username is valid and unused
    */
   checkUsername = async (username) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
     try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/users/username?username=${username}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      if (res?.status == 200 || res?.status == 204) {
-        return true;
-      } else {
+      await this.#request("/v1/users/username", {
+        query: { username: username },
+        failure: "Failed to check username.",
+      });
+      return true;
+    } catch (err) {
+      // A non-2xx response means the username is taken or invalid.  Anything
+      // without a status (no token, network failure) is a real error.
+      if (err instanceof SidechatAPIError && err.status) {
         return false;
       }
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to check username.`);
+      throw err;
     }
   };
 
@@ -1271,26 +1030,12 @@ class SidechatAPIClient {
    * @param {String} username - new username to set
    */
   setUsername = async (userID, username) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/users/${userID}`, {
-        method: "PATCH",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          username: username,
-        }),
-      });
-      const json = await res.json();
-      return await json.user;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to set icon.`);
-    }
+    const json = await this.#request(`/v1/users/${encodeURIComponent(userID)}`, {
+      method: "PATCH",
+      body: { username: username },
+      failure: "Failed to set username.",
+    });
+    return json.user;
   };
 
   /**
@@ -1301,26 +1046,11 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatProfile>}
    */
   getUserProfile = async (username) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/groups/username?username=${username}&cacheBust=${Date.now()}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      return await json.group;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to set icon.`);
-    }
+    const json = await this.#request("/v1/groups/username", {
+      query: { username: username, cacheBust: Date.now() },
+      failure: "Failed to get user profile.",
+    });
+    return json.group;
   };
 
   /**
@@ -1331,26 +1061,11 @@ class SidechatAPIClient {
    * @returns {Promise<types.SidechatPostOrComment[]>}
    */
   getUserPosts = async (username) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/users/posts?username=${username}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      return await json.posts;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to set icon.`);
-    }
+    const json = await this.#request("/v1/users/posts", {
+      query: { username: username },
+      failure: "Failed to get user posts.",
+    });
+    return json.posts;
   };
 
   /**
@@ -1360,26 +1075,11 @@ class SidechatAPIClient {
    * @param {String} activityID - alphanumeric ID of activity object
    */
   readActivity = async (activityID) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/activity/seen`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          ids: [activityID],
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to mark activity as read.`);
-    }
+    return this.#request("/v1/activity/seen", {
+      method: "POST",
+      body: { ids: [activityID] },
+      failure: "Failed to mark activity as read.",
+    });
   };
 
   /**
@@ -1388,26 +1088,11 @@ class SidechatAPIClient {
    * @since 2.3.5
    */
   getGroupChats = async () => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/chats/explore&cacheBust=${Date.now()}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      return await json.chats;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to get groupchats.`);
-    }
+    const json = await this.#request("/v1/chats/explore", {
+      query: { cacheBust: Date.now() },
+      failure: "Failed to get groupchats.",
+    });
+    return json.chats;
   };
 
   /**
@@ -1427,32 +1112,19 @@ class SidechatAPIClient {
     primaryColor,
     secondaryColor,
   ) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/chats/groups/join`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
+    return this.#request("/v1/chats/groups/join", {
+      method: "POST",
+      body: {
+        chat_id: groupChatID,
+        identity: {
+          display_name: displayName,
+          emoji: emoji,
+          secondary_color: secondaryColor,
+          color: primaryColor,
         },
-        body: JSON.stringify({
-          chat_id: groupChatID,
-          identity: {
-            display_name: displayName,
-            emoji: emoji,
-            secondary_color: secondaryColor,
-            color: primaryColor,
-          },
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to join groupchat.`);
-    }
+      },
+      failure: "Failed to join groupchat.",
+    });
   };
 
   /**
@@ -1462,28 +1134,10 @@ class SidechatAPIClient {
    * @since 2.4.4
    */
   getDMs = async () => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/chats`, {
-        method: "GET",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-      });
-      const json = await res.json();
-      const list = await json.chats;
-      let r = [];
-      list.forEach((o) => {
-        r.push(o.chat);
-      });
-      return await r;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to fetch DMs.`);
-    }
+    const json = await this.#request("/v1/chats", {
+      failure: "Failed to fetch DMs.",
+    });
+    return (json.chats || []).map((o) => o.chat);
   };
 
   /**
@@ -1494,26 +1148,11 @@ class SidechatAPIClient {
    * @since 2.4.4
    */
   getDMThread = async (id) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(
-        `${this.apiRoot}/v1/chats/messages?chat_id=${id}`,
-        {
-          method: "GET",
-          headers: {
-            ...this.defaultHeaders,
-            Authorization: `Bearer ${this.userToken}`,
-          },
-        },
-      );
-      const json = await res.json();
-      return await json.chat;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to fetch DM thread.`);
-    }
+    const json = await this.#request("/v1/chats/messages", {
+      query: { chat_id: id },
+      failure: "Failed to fetch DM thread.",
+    });
+    return json.chat;
   };
 
   /**
@@ -1522,35 +1161,22 @@ class SidechatAPIClient {
    * @param {String} chatID - alphanumeric ID of the chat to send to
    * @param {String} text - text content of message
    * @param {String} clientID - alphanumeric device ID
-   * @param {types.SidechatAsset[]} assets - array of assets to send
+   * @param {types.SidechatSimpleAsset[]} assets - array of assets to send
    * @param {Boolean} anonymous - whether the DM should be sent anonymously
    * @since 2.4.4
    */
   sendDM = async (chatID, text, clientID, assets = [], anonymous = false) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/chats/send`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          chat_id: chatID,
-          text: text,
-          client_id: clientID,
-          anonymous: anonymous,
-          assets: assets,
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to send message.`);
-    }
+    return this.#request("/v1/chats/send", {
+      method: "POST",
+      body: {
+        chat_id: chatID,
+        text: text,
+        client_id: clientID,
+        anonymous: anonymous,
+        assets: assets,
+      },
+      failure: "Failed to send message.",
+    });
   };
 
   /**
@@ -1570,30 +1196,17 @@ class SidechatAPIClient {
     anonymous = false,
     postContext = "feed",
   ) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/chats/start`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          text: text,
-          client_id: clientID,
-          post_id: postID,
-          anonymous: anonymous,
-          post_context: postContext,
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to start DM.`);
-    }
+    return this.#request("/v1/chats/start", {
+      method: "POST",
+      body: {
+        text: text,
+        client_id: clientID,
+        post_id: postID,
+        anonymous: anonymous,
+        post_context: postContext,
+      },
+      failure: "Failed to start DM.",
+    });
   };
 
   /**
@@ -1603,28 +1216,15 @@ class SidechatAPIClient {
    * @since 2.6.2
    */
   hidePostsFromUser = async (postID) => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/posts/hide_posts_from_user`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({
-          post_id: postID,
-          post_context: "feed",
-          report: false,
-        }),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to hide post.`);
-    }
+    return this.#request("/v1/posts/hide_posts_from_user", {
+      method: "POST",
+      body: {
+        post_id: postID,
+        post_context: "feed",
+        report: false,
+      },
+      failure: "Failed to hide post.",
+    });
   };
 
   /**
@@ -1633,24 +1233,11 @@ class SidechatAPIClient {
    * @since 2.6.2
    */
   unhidePostsFromAllUsers = async () => {
-    if (!this.userToken) {
-      throw new SidechatAPIError("User is not authenticated.");
-    }
-    try {
-      const res = await fetch(`${this.apiRoot}/v1/users/unhide_all`, {
-        method: "POST",
-        headers: {
-          ...this.defaultHeaders,
-          Authorization: `Bearer ${this.userToken}`,
-        },
-        body: JSON.stringify({}),
-      });
-      const json = await res.json();
-      return await json;
-    } catch (err) {
-      console.error(err);
-      throw new SidechatAPIError(`Failed to unhide post.`);
-    }
+    return this.#request("/v1/users/unhide_all", {
+      method: "POST",
+      body: {},
+      failure: "Failed to unhide posts.",
+    });
   };
 }
 

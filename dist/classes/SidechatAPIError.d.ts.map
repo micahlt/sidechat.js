@@ -1,1 +1,1 @@
-{"version":3,"file":"SidechatAPIError.d.ts","sourceRoot":"","sources":["../../src/classes/SidechatAPIError.js"],"names":[],"mappings":";AAAA;;;;GAIG;AACH;IACE,0BAGC;CACF"}
+{"version":3,"file":"SidechatAPIError.d.ts","sourceRoot":"","sources":["../../src/classes/SidechatAPIError.js"],"names":[],"mappings":";AAAA;;;;GAIG;AACH;IAaE;;;;;;OAMG;IACH,uCAJG;QAAyB,MAAM;QACT,QAAQ,GAAtB,GAAG;QACa,KAAK,GAArB,KAAK;KACf,EAMA;IAxBD;;;OAGG;IACH,QAFU,SAAO,SAAS,CAEnB;IAEP;;;OAGG;IACH,UAFU,GAAG,CAEJ;CAeV"}

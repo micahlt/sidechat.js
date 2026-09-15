@@ -27,8 +27,9 @@
     "build": "rollup -c",
     "dev": "rollup -c --watch",
     "docs": "jsdoc --configure jsdoc.json --verbose",
-    "prepublish": "tsc",
-    "typegen": "tsc"
+    "typegen": "tsc",
+    "test": "node --test \"src/tests/unit/**/*.test.js\"",
+    "prepublishOnly": "npm run typegen && npm run build && npm test"
   },
   "repository": {
     "type": "git",

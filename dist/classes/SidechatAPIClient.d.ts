@@ -20,8 +20,6 @@ declare class SidechatAPIClient {
     /**
      * Default headers for every API request
      * @type {Object}
-     * @static
-     * @constant
      */
     defaultHeaders: any;
     /**
@@ -44,16 +42,17 @@ declare class SidechatAPIClient {
      */
     setAPIRoot: (url: string) => void;
     /**
-     * Run an arbitrary API request using the current client's authentication
+     * Run an arbitrary API request using the current client's authentication.  Returns the raw Response so you can inspect status and body yourself.
      * @method
      * @param {String} endpoint - API endpoint to request (e.g. "/v1/posts")
      * @param {"GET"|"POST"|"PUT"|"DELETE"|"PATCH"|"OPTIONS"} [method] - HTTP method to use
-     * @param {Object} [body] - body to send with the request
+     * @param {Object|String} [body] - body to send with the request.  Objects are JSON-encoded; strings are sent as-is.
      * @param {Object} [headers] - custom headers to send with the request
-     * @param {Boolean} [stripHeaders] - remove the default headers from the request
+     * @param {Boolean} [stripHeaders] - remove the default headers from the request (custom headers are still sent)
+     * @returns {Promise<Response>}
      * @since 2.4.9
      */
-    sendRequest: (endpoint: string, method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS", body?: any, headers?: any, stripHeaders?: boolean) => Promise<Response>;
+    sendRequest: (endpoint: string, method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS", body?: any | string, headers?: any, stripHeaders?: boolean) => Promise<Response>;
     /**
      * Initiate the login process with a phone number.  Should be followed up with verifySMSCode().
      * @method
@@ -95,9 +94,9 @@ declare class SidechatAPIClient {
      * Set the device ID of the current user
      * @method
      * @since 1.0.0
-     * @param {String} deviceId - the device ID to set
+     * @param {String} deviceID - the device ID to set
      */
-    setDeviceID: (deviceID: any) => Promise<any>;
+    setDeviceID: (deviceID: string) => Promise<any>;
     /**
      * Get updated status for user and group
      * @method
@@ -149,7 +148,7 @@ declare class SidechatAPIClient {
      */
     getUserContent: (contentType: "posts" | "comments") => Promise<types.SidechatPostOrComment[]>;
     /**
-     * Get all the commments on a post
+     * Get all the commments on a post.  Replies are placed directly after the comment they reply to, regardless of the order the API returns them in.
      * @method
      * @since 2.0.0-alpha.0
      * @param {String} postID - post ID to get comments for
@@ -227,10 +226,11 @@ declare class SidechatAPIClient {
      * @param {Boolean} [disableDMs] - prevent direct messages from being sent to post's author
      * @param {Boolean} [disableComments] - whether or not comments should be disabled on post
      * @param {Boolean} [anonymous] - whether or not to hide user's name and icon on post
+     * @param {String} [repostId] - alphanumeric ID of a post to quote/repost.  Omit for a normal post.
      * @param {Array<String>} [pollOptions] - List of poll options.  If provided, a poll will be created with these options.
      * @returns {Promise<types.SidechatPostOrComment>} the created post
      */
-    createPost: (text: string, groupID: string, assetList?: types.SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: any, pollOptions?: Array<string>) => Promise<types.SidechatPostOrComment>;
+    createPost: (text: string, groupID: string, assetList?: types.SidechatSimpleAsset[], disableDMs?: boolean, disableComments?: boolean, anonymous?: boolean, repostId?: string, pollOptions?: Array<string>) => Promise<types.SidechatPostOrComment>;
     /**
      * Deletes a post or comment that the user created
      * @method
@@ -254,7 +254,8 @@ declare class SidechatAPIClient {
      */
     viewPollResults: (pollId: string) => Promise<any>;
     /**
-     * Uploads an asset to AWS S3 for use in posts and comments.  Currently photos only
+     * Uploads an asset to AWS S3 for use in posts and comments.  Currently photos only.
+     * Note: the `{ uri, name, type }` FormData shape used here is what React Native's FormData expects; in Node you will need to supply a Blob yourself.
      * @method
      * @param {String} uri - URI of the asset to upload
      * @param {String} mimeType - mimetype of the asset (e.g. "image/png")
@@ -358,11 +359,11 @@ declare class SidechatAPIClient {
      * @param {String} chatID - alphanumeric ID of the chat to send to
      * @param {String} text - text content of message
      * @param {String} clientID - alphanumeric device ID
-     * @param {types.SidechatAsset[]} assets - array of assets to send
+     * @param {types.SidechatSimpleAsset[]} assets - array of assets to send
      * @param {Boolean} anonymous - whether the DM should be sent anonymously
      * @since 2.4.4
      */
-    sendDM: (chatID: string, text: string, clientID: string, assets?: types.SidechatAsset[], anonymous?: boolean) => Promise<any>;
+    sendDM: (chatID: string, text: string, clientID: string, assets?: types.SidechatSimpleAsset[], anonymous?: boolean) => Promise<any>;
     /**
      * Creates a new direct message thread
      * @method
@@ -387,6 +388,7 @@ declare class SidechatAPIClient {
      * @since 2.6.2
      */
     unhidePostsFromAllUsers: () => Promise<any>;
+    #private;
 }
 import type * as types from "../types/SidechatTypes.js";
 //# sourceMappingURL=SidechatAPIClient.d.ts.map

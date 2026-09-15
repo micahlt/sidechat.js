@@ -316,7 +316,7 @@ export type SidechatProfile = {
     /**
      * - the user bio
      */
-    description: boolean;
+    description: string;
     /**
      * - undocumented
      */

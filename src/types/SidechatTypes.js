@@ -109,7 +109,7 @@
  * @prop {String} id - alphanumeric ID of user
  * @prop {String} name - public-facing username
  * @prop {SidechatIcon} conversation_icon - icon associated with user
- * @prop {Boolean} description - the user bio
+ * @prop {String} description - the user bio
  * @prop {String} index_name - undocumented
  * @prop {String} analytics_name - undocumented
  * @prop {String} color - undocumented

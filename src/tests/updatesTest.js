@@ -11,7 +11,7 @@ async function main() {
     return;
   } else {
 
-    const post = await API.getUpdates(API);
+    const post = await API.getUpdates();
     console.log(post.user_posts);
   }
 }
