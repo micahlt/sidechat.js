@@ -12,14 +12,16 @@
  * @prop {Number} vote_total - sum of upvotes and downvotes
  * @prop {SidechatVoteString} vote_status - current user's vote on post or comment
  * @prop {SidechatSimpleAsset[]} assets - array of simple assets attached to post or comment
- * @prop {Array} attachments - undocumented
+ * @prop {SidechatAttachment[]} attachments - link attachments on the post
  * @prop {Boolean} dms_disabled - whether or not you can send a DM to creator of post
  * @prop {String[]} tags - undocumented
  * @prop {SidechatIdentity} identity - creator's identity information
  * @prop {Boolean} pinned - undocumented
  * @prop {Boolean} is_saved - whether or not the current user has saved the post
- * @prop {"following"|"not_following"} follow_status - whether or not the current user should recieve activity notifications for the post
- * @prop {"group"} [destination] - undocumented
+ * @prop {"following"|"following_commented"|"not_following"} follow_status - whether or not the current user should recieve activity notifications for the post
+ * @prop {"group"|"account"} [destination] - whether the post was made in a group or on the author's profile
+ * @prop {Boolean} [is_deleted] - whether or not the post or comment has been deleted
+ * @prop {{post: SidechatPostOrComment, is_unavailable: Boolean}} [quote_post] - the post being quoted, if this is a repost
  * @prop {Number} [comment_count] - number of comments on post (only if type=post)
  * @prop {Boolean} [comments_disabled] - whether or not you can comment on post (only if type=post)
  * @prop {SidechatPoll} [poll] - poll attached to post (only if the post has a poll)
@@ -50,11 +52,13 @@
  * An asset object, containing information about an image within a post or comment
  * @typedef {Object} SidechatSimpleAsset
  * @prop {String} id - alphanumeric ID of asset
- * @prop {"image"} type - undocumented
- * @prop {"jpeg"|"png"|"gif"} content_type - file type of asset
+ * @prop {"image"|"video"} type - whether the asset is an image or a video
+ * @prop {"jpeg"|"png"|"gif"|"webp"|"mp4"|"mov"} content_type - file type of asset
  * @prop {Number} width - width of asset
  * @prop {Number} height - height of asset
- * @prop {SidechatPrivateAssetURL} [url] - URL string of asset's location
+ * @prop {SidechatPrivateAssetURL} [url] - URL string of asset's location (an HLS .m3u8 stream for processed videos)
+ * @prop {SidechatSimpleAsset} [thumbnail_asset] - preview image (only if type=video)
+ * @prop {"not_started"|"ingest"|"complete"|"error"} [vod_status] - processing status (only if type=video)
  */
 
 /**
@@ -153,7 +157,6 @@
  * @prop {SidechatCursorString} cursor
  */
 
-
 /**
  * A direct message thread
  * @typedef {Object} SidechatDirectThread
@@ -189,7 +192,7 @@
  * @prop {Boolean} allows_view_results - whether or not poll results are publicly visible
  * @prop {Number} view_results_count - number of users who have viewed poll results
  * @prop {Boolean} participated - whether or not current user has voted in poll
-*/
+ */
 
 /**
  * Represents a poll choice
@@ -197,6 +200,95 @@
  * @prop {Number} count - number of votes for choice
  * @prop {String} text - user-visible text of choice
  * @prop {Boolean} selected - whether or not current user has voted for choice
-*/
+ */
+
+/**
+ * A link attachment on a post
+ * @typedef {Object} SidechatAttachment
+ * @prop {String} id - alphanumeric ID of attachment
+ * @prop {"link"|"youtube"} type - whether the link is a regular link or a YouTube video
+ * @prop {String} link_url - URL the attachment points to
+ * @prop {String} [display_url] - shortened URL for display
+ * @prop {String} [title] - title of the linked page
+ * @prop {{id: String, url: String, width: Number, height: Number, content_type: "png"|"gif"}} [asset] - preview image of the linked page
+ */
+
+/**
+ * A page of the home feed
+ * @typedef {Object} SidechatFeed
+ * @prop {SidechatFeedItem[]} feed_items - items in the feed
+ * @prop {SidechatCursorString} cursor
+ */
+
+/**
+ * A single item in the home feed
+ * @typedef {Object} SidechatFeedItem
+ * @prop {String} item_type - type of item (posts have a type of "post")
+ * @prop {SidechatPostOrComment} [post] - the post, if this item is a post
+ */
+
+/**
+ * A page of the user's activity
+ * @typedef {Object} SidechatActivityList
+ * @prop {SidechatActivityItem[]} items - activity items
+ * @prop {SidechatCursorString} cursor
+ */
+
+/**
+ * A single activity item (in-app notification)
+ * @typedef {Object} SidechatActivityItem
+ * @prop {String} id - alphanumeric ID of activity item
+ * @prop {String} type - kind of activity (e.g. "comment", "comment_reply", "votes", "new_follower", "quote", "trending_post")
+ * @prop {String} text - user-facing description of the activity
+ * @prop {String} timestamp - date string of when the activity happened
+ * @prop {Boolean} is_seen - whether or not the user has seen the activity
+ * @prop {String} [post_id] - alphanumeric ID of related post
+ * @prop {String} [comment_id] - alphanumeric ID of related comment
+ * @prop {String} [group_id] - alphanumeric ID of related group
+ * @prop {Number} [yakarma] - yakarma gained
+ * @prop {String} [username] - username of the other user involved, if any
+ */
+
+/**
+ * A group leaderboard and the current user's place in it
+ * @typedef {Object} SidechatLeaderboard
+ * @prop {Array<{value: Number}>} leaderboard - all-time leaderboard entries
+ * @prop {Array<{value: Number}>} season_leaderboard - leaderboard entries for the current season
+ * @prop {{year: Number, season: String, remaining_days: Number}} season - the current season
+ * @prop {SidechatKarma} karma - current user's all-time karma in the group
+ * @prop {SidechatKarma} season_karma - current user's karma this season
+ */
+
+/**
+ * A user's karma within a group
+ * @typedef {Object} SidechatKarma
+ * @prop {String} group_id - alphanumeric ID of group
+ * @prop {Number} post - karma from posts
+ * @prop {Number} comment - karma from comments
+ * @prop {Number} yakarma - total karma
+ */
+
+/**
+ * Which push notifications a user receives
+ * @typedef {Object} SidechatNotificationPreferences
+ * @prop {Boolean} [chats] - direct messages
+ * @prop {Boolean} [followed_posts_activity] - new comments on followed posts
+ * @prop {Boolean} [new_followers] - new followers
+ * @prop {Boolean} [post_activity] - comments and votes on the user's own posts
+ * @prop {Boolean} [trending] - trending posts
+ * @prop {Boolean} [community_activity] - undocumented
+ * @prop {Boolean} [leaderboards] - leaderboard updates
+ * @prop {Boolean} [rewards] - undocumented
+ * @prop {Boolean} [feature_updates] - announcements about new features
+ * @prop {Boolean} [yak_ball_updates] - undocumented
+ * @prop {Boolean} [game_reminders] - undocumented
+ * @prop {Boolean} [daily_game_reminders] - undocumented
+ * @prop {Boolean} [game_invitations] - undocumented
+ * @prop {Boolean} [game_match_updates] - undocumented
+ */
+/**
+ * A reason for reporting a post, comment, or direct message thread
+ * @typedef {"username"|"spam"|"offTopic"|"pii"|"selfHarmDangerousActs"|"illegalActivities"|"offensiveHateSpeech"|"harassmentBullying"|"minorSafety"|"sexualContent"|"violentGraphicContent"|"misinformation"|"other"} SidechatReportReason
+ */
 
 export default {};
