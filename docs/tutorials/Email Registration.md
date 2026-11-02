@@ -14,3 +14,6 @@ await API.checkEmailVerification();
 ```
 
 You should be verified!
+
+> ### NOTE
+> There's also a `verifyEmailWithThirdParty` method that verifies the user's school email by signing in with Google or Microsoft instead of clicking a link.  It's experimental and I haven't tested it yet, so use it at your own risk.
