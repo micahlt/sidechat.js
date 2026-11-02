@@ -49,9 +49,9 @@ export type SidechatPostOrComment = {
      */
     assets: SidechatSimpleAsset[];
     /**
-     * - undocumented
+     * - link attachments on the post
      */
-    attachments: any[];
+    attachments: SidechatAttachment[];
     /**
      * - whether or not you can send a DM to creator of post
      */
@@ -75,11 +75,22 @@ export type SidechatPostOrComment = {
     /**
      * - whether or not the current user should recieve activity notifications for the post
      */
-    follow_status: "following" | "not_following";
+    follow_status: "following" | "following_commented" | "not_following";
     /**
-     * - undocumented
+     * - whether the post was made in a group or on the author's profile
      */
-    destination?: "group";
+    destination?: "group" | "account";
+    /**
+     * - whether or not the post or comment has been deleted
+     */
+    is_deleted?: boolean;
+    /**
+     * - the post being quoted, if this is a repost
+     */
+    quote_post?: {
+        post: SidechatPostOrComment;
+        is_unavailable: boolean;
+    };
     /**
      * - number of comments on post (only if type=post)
      */
@@ -171,13 +182,13 @@ export type SidechatSimpleAsset = {
      */
     id: string;
     /**
-     * - undocumented
+     * - whether the asset is an image or a video
      */
-    type: "image";
+    type: "image" | "video";
     /**
      * - file type of asset
      */
-    content_type: "jpeg" | "png" | "gif";
+    content_type: "jpeg" | "png" | "gif" | "webp" | "mp4" | "mov";
     /**
      * - width of asset
      */
@@ -187,9 +198,17 @@ export type SidechatSimpleAsset = {
      */
     height: number;
     /**
-     * - URL string of asset's location
+     * - URL string of asset's location (an HLS .m3u8 stream for processed videos)
      */
     url?: SidechatPrivateAssetURL;
+    /**
+     * - preview image (only if type=video)
+     */
+    thumbnail_asset?: SidechatSimpleAsset;
+    /**
+     * - processing status (only if type=video)
+     */
+    vod_status?: "not_started" | "ingest" | "complete" | "error";
 };
 /**
  * An asset object, containing information about an image from the asset library
@@ -502,4 +521,236 @@ export type SidechatPollChoice = {
      */
     selected: boolean;
 };
+/**
+ * A link attachment on a post
+ */
+export type SidechatAttachment = {
+    /**
+     * - alphanumeric ID of attachment
+     */
+    id: string;
+    /**
+     * - whether the link is a regular link or a YouTube video
+     */
+    type: "link" | "youtube";
+    /**
+     * - URL the attachment points to
+     */
+    link_url: string;
+    /**
+     * - shortened URL for display
+     */
+    display_url?: string;
+    /**
+     * - title of the linked page
+     */
+    title?: string;
+    /**
+     * - preview image of the linked page
+     */
+    asset?: {
+        id: string;
+        url: string;
+        width: number;
+        height: number;
+        content_type: "png" | "gif";
+    };
+};
+/**
+ * A page of the home feed
+ */
+export type SidechatFeed = {
+    /**
+     * - items in the feed
+     */
+    feed_items: SidechatFeedItem[];
+    cursor: SidechatCursorString;
+};
+/**
+ * A single item in the home feed
+ */
+export type SidechatFeedItem = {
+    /**
+     * - type of item (posts have a type of "post")
+     */
+    item_type: string;
+    /**
+     * - the post, if this item is a post
+     */
+    post?: SidechatPostOrComment;
+};
+/**
+ * A page of the user's activity
+ */
+export type SidechatActivityList = {
+    /**
+     * - activity items
+     */
+    items: SidechatActivityItem[];
+    cursor: SidechatCursorString;
+};
+/**
+ * A single activity item (in-app notification)
+ */
+export type SidechatActivityItem = {
+    /**
+     * - alphanumeric ID of activity item
+     */
+    id: string;
+    /**
+     * - kind of activity (e.g. "comment", "comment_reply", "votes", "new_follower", "quote", "trending_post")
+     */
+    type: string;
+    /**
+     * - user-facing description of the activity
+     */
+    text: string;
+    /**
+     * - date string of when the activity happened
+     */
+    timestamp: string;
+    /**
+     * - whether or not the user has seen the activity
+     */
+    is_seen: boolean;
+    /**
+     * - alphanumeric ID of related post
+     */
+    post_id?: string;
+    /**
+     * - alphanumeric ID of related comment
+     */
+    comment_id?: string;
+    /**
+     * - alphanumeric ID of related group
+     */
+    group_id?: string;
+    /**
+     * - yakarma gained
+     */
+    yakarma?: number;
+    /**
+     * - username of the other user involved, if any
+     */
+    username?: string;
+};
+/**
+ * A group leaderboard and the current user's place in it
+ */
+export type SidechatLeaderboard = {
+    /**
+     * - all-time leaderboard entries
+     */
+    leaderboard: Array<{
+        value: number;
+    }>;
+    /**
+     * - leaderboard entries for the current season
+     */
+    season_leaderboard: Array<{
+        value: number;
+    }>;
+    /**
+     * - the current season
+     */
+    season: {
+        year: number;
+        season: string;
+        remaining_days: number;
+    };
+    /**
+     * - current user's all-time karma in the group
+     */
+    karma: SidechatKarma;
+    /**
+     * - current user's karma this season
+     */
+    season_karma: SidechatKarma;
+};
+/**
+ * A user's karma within a group
+ */
+export type SidechatKarma = {
+    /**
+     * - alphanumeric ID of group
+     */
+    group_id: string;
+    /**
+     * - karma from posts
+     */
+    post: number;
+    /**
+     * - karma from comments
+     */
+    comment: number;
+    /**
+     * - total karma
+     */
+    yakarma: number;
+};
+/**
+ * Which push notifications a user receives
+ */
+export type SidechatNotificationPreferences = {
+    /**
+     * - direct messages
+     */
+    chats?: boolean;
+    /**
+     * - new comments on followed posts
+     */
+    followed_posts_activity?: boolean;
+    /**
+     * - new followers
+     */
+    new_followers?: boolean;
+    /**
+     * - comments and votes on the user's own posts
+     */
+    post_activity?: boolean;
+    /**
+     * - trending posts
+     */
+    trending?: boolean;
+    /**
+     * - undocumented
+     */
+    community_activity?: boolean;
+    /**
+     * - leaderboard updates
+     */
+    leaderboards?: boolean;
+    /**
+     * - undocumented
+     */
+    rewards?: boolean;
+    /**
+     * - announcements about new features
+     */
+    feature_updates?: boolean;
+    /**
+     * - undocumented
+     */
+    yak_ball_updates?: boolean;
+    /**
+     * - undocumented
+     */
+    game_reminders?: boolean;
+    /**
+     * - undocumented
+     */
+    daily_game_reminders?: boolean;
+    /**
+     * - undocumented
+     */
+    game_invitations?: boolean;
+    /**
+     * - undocumented
+     */
+    game_match_updates?: boolean;
+};
+/**
+ * A reason for reporting a post, comment, or direct message thread
+ */
+export type SidechatReportReason = "username" | "spam" | "offTopic" | "pii" | "selfHarmDangerousActs" | "illegalActivities" | "offensiveHateSpeech" | "harassmentBullying" | "minorSafety" | "sexualContent" | "violentGraphicContent" | "misinformation" | "other";
 //# sourceMappingURL=SidechatTypes.d.ts.map
