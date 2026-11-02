@@ -776,7 +776,7 @@ class SidechatAPIClient {
       });
       const json = await res.json();
       if (!res.ok) throw new SidechatAPIError(json.message);
-      return await json.comment;
+      return (await json.comment) ?? json;
     } catch (err) {
       console.error(err);
       if (err instanceof SidechatAPIError && err.message) throw err;
@@ -842,7 +842,7 @@ class SidechatAPIClient {
       });
       const json = await res.json();
       if (!res.ok) throw new SidechatAPIError(json.message);
-      return await json.posts[0];
+      return (await json.posts?.[0]) ?? json;
     } catch (err) {
       console.error(err);
       if (err instanceof SidechatAPIError && err.message) throw err;
