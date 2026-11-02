@@ -15,6 +15,13 @@ First, create a new instance of the client:
 const API = new SidechatAPIClient();
 ```
 
+The official app sends an identifier for the device along with every request, so it's a good idea to do the same.  This should be something that stays the same every time your app runs on the same device:
+
+```javascript
+const deviceID = /* Stable ID for this device */;
+API.setDeviceIdentifier(deviceID);
+```
+
 For existing users, logging in is trivial.  First, send the user a verification code to their phone number.  Make sure the passed phone number is in a 10-digit format with no dashes, spaces, or parentheses:
 
 ```javascript
@@ -22,7 +29,9 @@ const phoneNumber = /* User's phone number */;
 await API.loginViaSMS(phoneNumber);
 ```
 
-Then once the user has inputted the 6-digit code into your application, verify it with the API:
+If the code never shows up, you can try sending it through Sidechat's backup SMS route by passing `true` as the second parameter.  Sometimes the server will also ask for a captcha before it sends a code, in which case the response will have an `error_code` of `"captcha_required"`.  sidechat.js can't solve those yet, so the best you can do is ask the user to try again later.
+
+Then once the user has inputted the 6-character code into your application, verify it with the API.  Codes can include letters, but they're not case-sensitive:
 
 ```javascript
 const code = /* SMS verification code */;
@@ -38,6 +47,8 @@ If the user has not used Sidechat before, the `verifySMSCode` will return a `reg
 const { registration_id } = res;
 await API.setAge(18, registration_id);
 ```
+
+`setAge` also sends the user's time zone, which defaults to the system time zone.  If your code is running somewhere other than the user's device (like a server), pass their time zone as the third parameter.
 
 Now the user should be logged in properly and future requests will be automatically authenticated.  You may still need to [add an email address](tutorial-Email%20Registration.html) for most functionality.
 
